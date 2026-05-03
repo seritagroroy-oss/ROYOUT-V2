@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoYout - Premium Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-[#0f0f0f] text-white font-sans overflow-hidden">
+    
+    <!-- Splash Screen Overlay -->
+    <div id="splash-screen" class="fixed inset-0 z-[500] bg-[#0f0f0f] flex flex-col items-center justify-center transition-all duration-1000">
+        <div class="relative mb-12">
+            <!-- Glow background -->
+            <div class="absolute -inset-16 bg-red-600/20 blur-[80px] rounded-full animate-pulse"></div>
+            
+            <div class="relative w-32 h-32 bg-white rounded-full flex items-center justify-center border-4 border-white/10 shadow-[0_0_50px_rgba(220,38,38,0.3)] animate-bounce-slow overflow-hidden">
+                <img src="logo.png" alt="R" class="w-20 h-20 rounded-full">
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center gap-4">
+            <h2 class="text-4xl font-black tracking-tighter text-white flex items-center gap-1">
+                <span>Ro</span><span class="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">Yout</span>
+            </h2>
+            <div class="w-48 h-1 bg-white/5 rounded-full overflow-hidden relative">
+                <div class="absolute inset-0 bg-red-600 w-1/2 rounded-full animate-shimmer-progress"></div>
+            </div>
+            <p class="text-[8px] text-gray-500 uppercase tracking-[0.5em] font-black mt-2 opacity-50">Chargement de l'expérience</p>
+        </div>
+    </div>
+    
+    <!-- Root Container: Full Screen Flex -->
+    <div class="h-screen flex flex-col">
+        
+        <!-- Custom Title Bar (Now part of the flow) -->
+        <div class="h-12 flex justify-between items-center px-6 z-[300] drag-area bg-white/[0.02] border-b border-white/5">
+            <div class="flex items-center gap-2 opacity-50">
+                <i class="fab fa-youtube text-red-600 text-xs"></i>
+                <span class="text-[9px] font-black uppercase tracking-[0.3em]">RoYout By ROY INDUSTRIE</span>
+            </div>
+            <div class="flex gap-6 no-drag">
+                <button onclick="window.pywebview.api.minimize_window()" class="text-gray-500 hover:text-white transition-all transform hover:scale-110">
+                    <i class="fas fa-minus text-[10px]"></i>
+                </button>
+                <button onclick="window.pywebview.api.toggle_maximize()" class="text-gray-500 hover:text-white transition-all transform hover:scale-110">
+                    <i class="fas fa-expand text-[10px]"></i>
+                </button>
+                <button onclick="window.pywebview.api.close_window()" class="text-gray-500 hover:text-red-500 transition-all transform hover:scale-110">
+                    <i class="fas fa-times text-[12px]"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Wrapper (Fills remaining height) -->
+        <div class="flex-1 flex flex-col px-8 pt-6 overflow-hidden">
+            <!-- Header Section -->
+            <header class="flex justify-between items-start mb-8">
+                <!-- Left Branding -->
+                <div>
+                    <div class="text-red-600 font-black tracking-[0.3em] text-sm mt-2">
+                        ROY INDUSTRIE
+                    </div>
+                    <!-- Bouton Historique -->
+                    <button onclick="toggleHistory()" class="mt-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-red-500 transition-all group">
+                        <span class="w-5 h-5 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-red-600/20 group-hover:scale-110 transition-all border border-white/5 group-hover:border-red-500/30">
+                            <i class="fas fa-history text-[9px]"></i>
+                        </span>
+                        Historique
+                    </button>
+                </div>
+
+                <!-- Center Logo -->
+                <div class="text-center flex flex-col items-center relative py-2 px-6 bg-white/[0.02] border border-white/5 rounded-[25px] backdrop-blur-md">
+                    <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-16 bg-red-600/10 blur-[40px] -z-10"></div>
+                    <h1 class="text-2xl font-black tracking-tighter flex items-center gap-0.5">
+                        <span class="text-white">Ro</span><span class="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">Yout</span>
+                    </h1>
+                    <p class="text-[7px] text-gray-500 uppercase tracking-[0.4em] font-black mt-0.5 opacity-80">Premium Downloader</p>
+                    <div class="flex gap-1.5 mt-2.5">
+                        <span class="flex items-center gap-1 px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[6px] font-black uppercase tracking-widest text-gray-500">
+                            <i class="fas fa-bolt text-[7px] text-orange-500"></i> Rapide
+                        </span>
+                        <span class="flex items-center gap-1 px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[6px] font-black uppercase tracking-widest text-gray-500">
+                            <i class="fas fa-star text-[7px] text-red-500"></i> Fiable
+                        </span>
+                        <span class="flex items-center gap-1 px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[6px] font-black uppercase tracking-widest text-gray-500">
+                            <i class="fas fa-lock text-[7px] text-orange-600"></i> Sécurisé
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Right Logo -->
+                <div class="relative mt-0">
+                    <div class="absolute -inset-1 rounded-full logo-spin-border"></div>
+                    <div class="relative w-16 h-16 bg-white rounded-full flex items-center justify-center border-4 border-gray-900 shadow-2xl">
+                        <img src="logo.png" alt="R" class="w-10 h-10 rounded-full">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content Area -->
+            <main class="flex-1 overflow-y-auto custom-scrollbar pb-12">
+                <div class="flex flex-col items-center pt-2">
+                    <div id="url-input-area" class="w-full max-w-5xl flex gap-3 p-2 bg-white/[0.03] border border-white/5 rounded-[30px] backdrop-blur-xl shadow-2xl group focus-within:border-red-500/30 transition-all duration-500">
+                        <div class="flex-1 relative flex items-center">
+                            <i class="fas fa-link absolute left-6 text-gray-600 group-focus-within:text-red-500 transition-colors"></i>
+                            <input id="url" type="text" placeholder="Collez le lien YouTube ici..." 
+                                   class="w-full bg-transparent p-5 pl-14 rounded-2xl outline-none text-lg placeholder:text-gray-700 font-medium tracking-tight">
+                        </div>
+                        <button id="analyze-btn" onclick="analyzeVideo()" 
+                                class="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 px-10 py-4 rounded-[22px] font-black text-sm uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg shadow-red-900/40 flex items-center gap-3">
+                            <span>Analyser</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <!-- Loader -->
+                    <div id="analyze-loader" class="hidden mt-8 flex items-center gap-3 animate-pulse">
+                        <span class="text-red-500 font-bold text-xs uppercase tracking-[0.4em]">Analyse en cours...</span>
+                    </div>
+
+                    <!-- Video Result Area -->
+                    <div id="video-preview" class="hidden animate-fade-in w-full max-w-5xl mt-12 relative p-[2px] overflow-hidden rounded-[42px] card-glow-container">
+                        <div class="absolute inset-0 card-glow-border"></div>
+                        <div class="relative bg-[#0f0f0f]/95 backdrop-blur-3xl rounded-[40px] p-8 w-full h-full shadow-2xl">
+                            <div class="flex justify-end mb-6">
+                                <button onclick="resetApp()" class="bg-red-600/10 hover:bg-red-600/20 border border-red-500/30 text-red-500 px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">
+                                    <i class="fas fa-redo-alt mr-2"></i> Nouvelle Analyse
+                                </button>
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-10 items-center border-b border-white/5 pb-10">
+                                <div class="relative group">
+                                    <div class="absolute -inset-1 bg-gradient-to-r from-red-600 to-orange-600 rounded-[30px] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                                    <img id="thumb" src="" class="relative w-80 aspect-video rounded-[25px] object-cover shadow-2xl border border-white/10">
+                                </div>
+                                <div class="flex-1 text-center md:text-left">
+                                    <h2 id="title" class="text-3xl font-black leading-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent"></h2>
+                                    <div class="flex items-center justify-center md:justify-start gap-4 mt-4">
+                                        <span id="duration" class="px-4 py-1.5 bg-red-600/10 border border-red-500/20 rounded-full text-red-500 text-xs font-bold tracking-widest uppercase"></span>
+                                        <span class="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-gray-400 text-xs font-bold tracking-widest uppercase">Qualité HD Disponible</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-10">
+                                <div class="space-y-6">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-900/40">
+                                            <i class="fas fa-video text-xs text-white"></i>
+                                        </div>
+                                        <h3 class="text-sm font-black uppercase tracking-[0.2em] text-white">Télécharger la Vidéo</h3>
+                                    </div>
+                                    <div id="video-formats" class="grid grid-cols-2 gap-3"></div>
+                                </div>
+                                <div class="space-y-6">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-900/40">
+                                            <i class="fas fa-music text-xs text-white"></i>
+                                        </div>
+                                        <h3 class="text-sm font-black uppercase tracking-[0.2em] text-white">Extraire l'Audio</h3>
+                                    </div>
+                                    <div id="audio-formats" class="grid grid-cols-2 gap-3"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-12 bg-black/40 border border-white/5 rounded-3xl p-6 flex items-center justify-between group hover:border-red-500/30 transition-all duration-500">
+                                <div class="flex items-center gap-5">
+                                    <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-red-500 transition-colors">
+                                        <i class="fas fa-folder-open text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-1">Dossier d'enregistrement</p>
+                                        <p id="current-folder-path" class="text-sm font-bold text-gray-300 tracking-tight">...</p>
+                                    </div>
+                                </div>
+                                <button onclick="changeFolder()" class="bg-white/5 hover:bg-white/10 px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/5">
+                                    Changer le dossier
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer Footer -->
+        <div class="px-8 pb-0.5 flex justify-start">
+            <button onclick="window.pywebview.api.open_url('https://github.com/votre-repo/RoYout/releases')" class="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 hover:text-red-500 transition-all flex items-center gap-2 group">
+                <span class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-red-600/20 group-hover:scale-110 transition-all border border-white/5 group-hover:border-red-500/30">
+                    <i class="fas fa-cloud-download-alt text-[11px]"></i>
+                </span>
+                <span>Télécharger la dernière version</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Full-Screen Overlays remain absolute/fixed -->
+    <div id="progress-container" class="hidden fixed inset-0 bg-[#0f0f0f]/95 backdrop-blur-2xl z-[100] flex flex-col items-center justify-start pt-12 p-10 opacity-0 pointer-events-none transition-all duration-500 scale-95">
+                <div class="w-full max-w-4xl animate-fade-in flex flex-col items-center">
+                    <span id="percent-text" class="text-[8rem] font-black text-red-600 leading-none tracking-tighter">0%</span>
+                    
+                    <div class="w-full mt-4">
+                        <p id="video-title" class="text-lg text-gray-400 truncate mb-6 text-center font-bold">Initialisation...</p>
+                        
+                        <div class="h-3 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 mb-8 shadow-inner">
+                            <div id="progress-bar" class="h-full bg-gradient-to-r from-red-600 to-orange-500 w-0 transition-all duration-300"></div>
+                        </div>
+
+                        <div class="flex justify-center gap-16">
+                            <div class="text-center">
+                                <p id="speed-val" class="text-4xl font-black text-white">0 MB/s</p>
+                                <p class="text-[10px] text-gray-600 uppercase font-black tracking-[0.3em] mt-2">Vitesse</p>
+                            </div>
+                            <div class="text-center">
+                                <p id="eta-val" class="text-4xl font-black text-white">--:--</p>
+                                <p class="text-[10px] text-gray-600 uppercase font-black tracking-[0.3em] mt-2">Temps restant</p>
+                            </div>
+                        </div>
+                        
+                        <p id="status-message" class="text-center text-[10px] mt-6 uppercase tracking-[0.5em] font-black text-red-500 animate-pulse">Téléchargement en cours...</p>
+
+                        <!-- Boutons de succès (cachés par défaut) -->
+                        <div id="success-actions" class="hidden flex justify-center gap-6 mt-4 animate-fade-in">
+                            <button onclick="openFolder()" class="bg-white/10 hover:bg-white/20 border border-white/10 px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3">
+                                <i class="fas fa-folder-open text-orange-500"></i> Ouvrir le dossier
+                            </button>
+                            <button onclick="closeOverlay()" class="bg-red-600 hover:bg-red-500 px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-red-900/40">
+                                Terminer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Historique Modal -->
+    <div id="history-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 md:p-20">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-3xl" onclick="toggleHistory()"></div>
+        
+        <div class="relative bg-[#0f0f0f] border border-white/5 w-full max-w-6xl h-full max-h-[80vh] rounded-[40px] overflow-hidden flex flex-col shadow-2xl animate-fade-in">
+            <!-- Header Modal -->
+            <div class="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <div>
+                    <h2 class="text-4xl font-black tracking-tighter text-white">HISTORIQUE</h2>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-black mt-2">Tes 50 derniers téléchargements</p>
+                </div>
+                <button onclick="toggleHistory()" class="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Liste Historique -->
+            <div id="history-list" class="flex-1 overflow-y-auto p-10 custom-scrollbar space-y-6">
+                <!-- Les items seront injectés ici -->
+                <div class="flex flex-col items-center justify-center h-full opacity-20">
+                    <i class="fas fa-history text-8xl mb-6"></i>
+                    <p class="text-xl font-bold uppercase tracking-widest">Aucun historique</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

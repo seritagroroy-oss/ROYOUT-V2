@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+dist/
+build/
+*.spec
+
+# FFmpeg (téléchargé par GitHub Actions)
+ffmpeg.exe
+ffprobe.exe
+
+# Données locales
+history.json
+last_folder.txt
+
+RoYout-Web/
+*.mp4
+*.zip
