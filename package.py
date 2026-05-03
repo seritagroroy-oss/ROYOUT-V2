@@ -45,7 +45,8 @@ def package():
         print("Exécutable : RoYout.exe")
         print("="*40)
     except Exception as e:
-        print(f"\nERREUR lors du packaging : {e}")
+        print(f"\nERREUR critique lors du packaging : {e}")
+        sys.exit(1) # Informe GitHub que la compilation a échoué
 
 if __name__ == "__main__":
     package()
