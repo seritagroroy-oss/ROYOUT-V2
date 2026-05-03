@@ -35,14 +35,15 @@ jobs:
     - name: Build with PyInstaller
       run: |
         python -m PyInstaller --noconfirm --onedir --windowed --icon="ui/logo.ico" --name="RoYout" --add-data="ui;ui" --add-data="ffmpeg.exe;." --add-data="ffprobe.exe;." main.py
+        Move-Item -Path dist/RoYout -Destination RoYout_Files
 
     - name: Verify Build Output
       run: |
-        ls -R dist/
-        if (Test-Path "dist/RoYout/RoYout.exe") {
+        ls -R RoYout_Files/
+        if (Test-Path "RoYout_Files/RoYout.exe") {
           Write-Host "Build successful, executable found."
         } else {
-          Write-Host "Error: Executable not found in dist/RoYout!"
+          Write-Host "Error: Executable not found in RoYout_Files!"
           exit 1
         }
 
