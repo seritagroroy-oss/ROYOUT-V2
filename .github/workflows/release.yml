@@ -50,8 +50,8 @@ jobs:
           exit 1
         }
 
-    - name: Compile with Inno Setup
-      run: iscc RoYout_Installer.iss
+    - name: Compile Installer with NSIS
+      run: makensis installer.nsi
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
