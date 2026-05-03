@@ -25,23 +25,28 @@ jobs:
 
     - name: Download FFmpeg
       run: |
-        # Téléchargement de FFmpeg pour Windows (version gyan.dev)
         curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip -o ffmpeg.zip
         Expand-Archive ffmpeg.zip -DestinationPath ffmpeg_temp
-        # Déplacer les fichiers nécessaires à la racine pour PyInstaller
         Get-ChildItem -Path ffmpeg_temp -Filter ffmpeg.exe -Recurse | Move-Item -Destination .
         Get-ChildItem -Path ffmpeg_temp -Filter ffprobe.exe -Recurse | Move-Item -Destination .
-        # Nettoyage
         Remove-Item ffmpeg.zip
         Remove-Item -Path ffmpeg_temp -Recurse
 
     - name: Build with PyInstaller
-      run: python package.py
+      run: |
+        python -m PyInstaller --noconfirm --onedir --windowed --icon="ui/logo.ico" --name="RoYout" --add-data="ui;ui" --add-data="ffmpeg.exe;." --add-data="ffprobe.exe;." main.py
+
+    - name: Verify Build Output
+      run: |
+        if (Test-Path "dist/RoYout/RoYout.exe") {
+          Write-Host "Build successful, executable found."
+        } else {
+          Write-Host "Error: Executable not found in dist/RoYout!"
+          exit 1
+        }
 
     - name: Compile with Inno Setup
-      run: |
-        # ISCC.exe est pre-install sur les runners windows de GitHub
-        iscc RoYout_Installer.iss
+      run: iscc RoYout_Installer.iss
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
