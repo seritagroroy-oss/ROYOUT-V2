@@ -3,7 +3,7 @@
 #define MyAppVersion "1.0"
 #define MyAppPublisher "ROY INDUSTRIE"
 #define MyAppExeName "RoYout.exe"
-#define MyAppIconName "ui\logo.ico"
+#define MyAppIconName "AppFiles\ui\logo.ico"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
