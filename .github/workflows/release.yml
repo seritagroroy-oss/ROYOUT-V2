@@ -16,12 +16,12 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11' # Version stable pour la compilation
+        python-version: '3.12'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller pywebview yt-dlp Pillow pystray pythonnet==3.1.0rc0
+        pip install pyinstaller pywebview yt-dlp Pillow pystray pythonnet
 
     - name: Download FFmpeg
       run: |
