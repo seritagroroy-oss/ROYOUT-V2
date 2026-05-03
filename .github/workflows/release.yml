@@ -46,7 +46,7 @@ jobs:
         }
 
     - name: Compile with Inno Setup
-      run: iscc RoYout_Installer.iss
+      run: iscc "${{ github.workspace }}\RoYout_Installer.iss"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
