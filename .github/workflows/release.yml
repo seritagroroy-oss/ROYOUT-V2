@@ -38,6 +38,7 @@ jobs:
 
     - name: Verify Build Output
       run: |
+        ls -R dist/
         if (Test-Path "dist/RoYout/RoYout.exe") {
           Write-Host "Build successful, executable found."
         } else {
@@ -46,7 +47,7 @@ jobs:
         }
 
     - name: Compile with Inno Setup
-      run: iscc "${{ github.workspace }}\RoYout_Installer.iss"
+      run: iscc RoYout_Installer.iss
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4

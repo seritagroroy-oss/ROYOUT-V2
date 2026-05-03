@@ -28,8 +28,9 @@ Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-; On prend tout ce qui est dans le dossier dist\RoYout gnr par PyInstaller
 Source: "dist\RoYout\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "ffmpeg.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ffprobe.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
