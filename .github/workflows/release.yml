@@ -50,8 +50,13 @@ jobs:
           exit 1
         }
 
-    - name: Compile Installer with NSIS
-      run: makensis installer.nsi
+    - name: Install Inno Setup
+      run: choco install innosetup --no-progress -y
+
+    - name: Compile Installer with Inno Setup
+      run: |
+        $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+        & $iscc RoYout_Installer.iss
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
