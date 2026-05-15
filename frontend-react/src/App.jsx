@@ -237,7 +237,14 @@ function App() {
 
             {isLoading && searchResults.length > 0 && (
                 <div className="mt-20 flex justify-center">
-                    <div className="w-8 h-8 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin"></div>
+                    <div className="w-12 h-12 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin"></div>
+                </div>
+            )}
+
+            {!hasMore && !isLoading && searchResults.length > 0 && (
+                <div className="mt-20 flex flex-col items-center gap-4 opacity-20 pb-20">
+                    <div className="w-1 bg-gradient-to-b from-red-600 to-transparent h-20 rounded-full"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.5em]">Fin des résultats</span>
                 </div>
             )}
           </section>

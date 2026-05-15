@@ -900,8 +900,9 @@ class Api:
                 if search_type in ['mixed', 'video']:
                     try:
                         with yt_dlp.YoutubeDL(search_opts) as ydl:
-                            # ytsearch: sans nombre chargera uniquement ce que demande playlist_items
-                            v_info = ydl.extract_info(f"ytsearch:{query}", download=False)
+                            # On force ytsearch à chercher assez de vidéos pour que playlist_items puisse piocher dedans
+                            search_limit = offset + limit + 10
+                            v_info = ydl.extract_info(f"ytsearch{search_limit}:{query}", download=False)
                             if v_info and 'entries' in v_info:
                                 for entry in v_info['entries']:
                                     if not entry: continue
