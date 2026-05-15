@@ -3,7 +3,7 @@ import Modal from './Modal';
 import { useAppState } from '../context/AppContext';
 import { useApi } from '../hooks/useApi';
 
-const VideoPreviewModal = ({ isOpen, onClose, videoUrl }) => {
+const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => {
     const { callApi } = useApi();
     const { toggleFavorite, favorites } = useAppState();
     const [metadata, setMetadata] = useState(null);
@@ -49,10 +49,16 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl }) => {
         if (!selectedFormat) return;
         if (metadata.status === 'playlist') {
             const res = await callApi('download_playlist', metadata.entries, selectedFormat, "");
-            if (res.status === 'success') onClose();
+            if (res.status === 'success') {
+                if (onDownloadStarted) onDownloadStarted();
+                onClose();
+            }
         } else {
             const res = await callApi('download_video', videoUrl, selectedFormat, "");
-            if (res.status === 'success') onClose();
+            if (res.status === 'success') {
+                if (onDownloadStarted) onDownloadStarted();
+                onClose();
+            }
         }
     };
 

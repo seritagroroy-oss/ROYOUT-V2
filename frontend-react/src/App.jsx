@@ -287,6 +287,7 @@ function App() {
         isOpen={modals.preview} 
         onClose={closeModals} 
         videoUrl={activeVideoUrl}
+        onDownloadStarted={() => openExclusiveModal('queue')}
       />
 
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
