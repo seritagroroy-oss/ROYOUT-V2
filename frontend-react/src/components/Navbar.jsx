@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppState } from '../context/AppContext';
 import { useApi } from '../hooks/useApi';
 
-const Navbar = ({ onOpenHistory, onOpenFavorites, onOpenQueue, onOpenMenu }) => {
+const Navbar = ({ onOpenHistory, onOpenFavorites, onOpenQueue, onOpenMenu, immersionMode }) => {
     const { queueCount, changeFontSize, resetFontSize } = useAppState();
     const { callApi } = useApi();
 
@@ -97,20 +97,22 @@ const Navbar = ({ onOpenHistory, onOpenFavorites, onOpenQueue, onOpenMenu }) => 
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 hidden xl:block">
                     ROY INDUSTRIE
                 </span>
-                <div className="flex items-center gap-1">
-                    <button 
-                        onClick={() => callApi('minimize_window')}
-                        className="w-9 h-9 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all"
-                    >
-                        <i className="fas fa-minus text-[10px]"></i>
-                    </button>
-                    <button 
-                        onClick={() => callApi('close_window')}
-                        className="w-9 h-9 rounded-lg hover:bg-red-600 flex items-center justify-center text-white/40 hover:text-white transition-all"
-                    >
-                        <i className="fas fa-times text-[10px]"></i>
-                    </button>
-                </div>
+                {immersionMode && (
+                    <div className="flex items-center gap-1">
+                        <button 
+                            onClick={() => callApi('minimize_window')}
+                            className="w-9 h-9 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all"
+                        >
+                            <i className="fas fa-minus text-[10px]"></i>
+                        </button>
+                        <button 
+                            onClick={() => callApi('close_window')}
+                            className="w-9 h-9 rounded-lg hover:bg-red-600 flex items-center justify-center text-white/40 hover:text-white transition-all"
+                        >
+                            <i className="fas fa-times text-[10px]"></i>
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

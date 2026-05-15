@@ -534,6 +534,9 @@ class Api:
     def toggle_fullscreen(self):
         if self._window:
             self._window.toggle_fullscreen()
+            # On notifie le frontend du nouvel état (pywebview.fullscreen est mis à jour après l'appel)
+            is_fs = self._window.fullscreen
+            self._window.evaluate_js(f"if(window.setImmersionMode) window.setImmersionMode({str(is_fs).lower()});")
         return True
 
     def select_folder(self):

@@ -34,6 +34,7 @@ function App() {
   const [currentQuery, setCurrentQuery] = useState('Musique');
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [immersionMode, setImmersionMode] = useState(false);
   
   // États des modales
   const [modals, setModals] = useState({
@@ -49,6 +50,8 @@ function App() {
   const [activeVideoUrl, setActiveVideoUrl] = useState(null);
 
   useEffect(() => {
+    window.setImmersionMode = (active) => setImmersionMode(active);
+    
     window.showUpdateModal = (version) => {
       setUpdateVersion(version);
       openExclusiveModal('update');
@@ -142,6 +145,7 @@ function App() {
         onOpenFavorites={() => openExclusiveModal('favorites')}
         onOpenQueue={() => openExclusiveModal('queue')}
         onOpenMenu={() => openExclusiveModal('menu')}
+        immersionMode={immersionMode}
       />
       
       <main className="flex-1 overflow-y-auto custom-scrollbar px-8 scroll-smooth">
