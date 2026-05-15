@@ -106,6 +106,12 @@ const Navbar = ({ onOpenHistory, onOpenFavorites, onOpenQueue, onOpenMenu, immer
                             <i className="fas fa-minus text-[10px]"></i>
                         </button>
                         <button 
+                            onClick={() => callApi('toggle_maximize')}
+                            className="w-9 h-9 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all"
+                        >
+                            <i className="far fa-square text-[10px]"></i>
+                        </button>
+                        <button 
                             onClick={() => callApi('close_window')}
                             className="w-9 h-9 rounded-lg hover:bg-red-600 flex items-center justify-center text-white/40 hover:text-white transition-all"
                         >
