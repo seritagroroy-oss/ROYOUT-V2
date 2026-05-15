@@ -6,6 +6,7 @@ import { useApi } from '../hooks/useApi';
 const HistoryModal = ({ isOpen, onClose }) => {
     const { history, loadInitialData } = useAppState();
     const { callApi } = useApi();
+    const [searchQuery, setSearchQuery] = React.useState('');
 
     const deleteItem = async (id) => {
         const success = await callApi('delete_history_item', id);
@@ -16,16 +17,37 @@ const HistoryModal = ({ isOpen, onClose }) => {
         callApi('open_download_folder', folder);
     };
 
+    const filteredHistory = history.filter(item => 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.resolution.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Historique" fullScreen={true}>
-            {history.length === 0 ? (
+            {/* Barre de recherche */}
+            <div className="mb-10 max-w-2xl mx-auto">
+                <div className="relative group">
+                    <div className="absolute inset-y-0 left-6 flex items-center text-white/20 group-focus-within:text-red-500 transition-colors">
+                        <i className="fas fa-search text-lg"></i>
+                    </div>
+                    <input 
+                        type="text" 
+                        placeholder="Rechercher dans vos téléchargements..." 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-white/[0.02] border border-white/5 rounded-[32px] py-6 pl-16 pr-8 text-sm font-bold text-white focus:bg-white/[0.04] focus:border-red-500/50 outline-none transition-all shadow-inner"
+                    />
+                </div>
+            </div>
+
+            {filteredHistory.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-40 opacity-20">
                     <i className="fas fa-history text-[120px] mb-10"></i>
-                    <p className="text-2xl font-black uppercase tracking-[0.5em]">Aucun historique</p>
+                    <p className="text-2xl font-black uppercase tracking-[0.5em]">{searchQuery ? "Aucun résultat" : "Aucun historique"}</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-                    {history.map((item, index) => (
+                    {filteredHistory.map((item, index) => (
                         <div 
                             key={item.id || index}
                             className="group relative bg-white/[0.02] border border-white/5 p-8 rounded-[40px] flex items-center gap-8 hover:bg-white/[0.05] transition-all hover:border-red-500/20"

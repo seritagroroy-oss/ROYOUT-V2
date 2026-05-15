@@ -7,24 +7,36 @@ const QueueModal = ({ isOpen, onClose }) => {
     const { callApi } = useApi();
     const { queueCount } = useAppState();
     const [queue, setQueue] = useState([]);
-    const [currentTask, setCurrentTask] = useState(null);
-    const [progress, setProgress] = useState(0);
-    const [speed, setSpeed] = useState('');
-    const [eta, setEta] = useState('');
+    const [taskStates, setTaskStates] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         // Branchement global pour recevoir la progression du backend
-        window.updateProgress = (p, s, e) => {
-            setProgress(p);
-            setSpeed(s);
-            setEta(e);
+        window.updateProgress = (url, p, s, e, ph) => {
+            setTaskStates(prev => ({
+                ...prev,
+                [url]: { progress: p, speed: s, eta: e, phase: ph }
+            }));
         };
 
-        window.resetProgress = () => {
-            setProgress(0);
-            setSpeed('');
-            setEta('');
+        window.onDownloadComplete = (url, status, msg) => {
+            setTaskStates(prev => {
+                const newState = { ...prev };
+                if (status === 'success') {
+                    delete newState[url]; // Retirer si fini
+                } else {
+                    newState[url] = { ...newState[url], status: 'error' };
+                }
+                return newState;
+            });
+            loadQueue();
+        };
+
+        window.resetProgress = (url) => {
+            setTaskStates(prev => ({
+                ...prev,
+                [url]: { progress: 0, speed: '', eta: '', phase: '' }
+            }));
         };
 
         if (isOpen) {
@@ -39,14 +51,25 @@ const QueueModal = ({ isOpen, onClose }) => {
             const res = await callApi('get_queue');
             if (res) {
                 setQueue(res.queue || []);
-                setCurrentTask(res.current);
+                // On fusionne les tâches actives du backend dans notre state local si besoin
+                if (res.active) {
+                    res.active.forEach(t => {
+                        if (!taskStates[t.url]) {
+                            setTaskStates(prev => ({ ...prev, [t.url]: { progress: 0, is_active: true } }));
+                        }
+                    });
+                }
             }
         } catch (err) {
             console.error("Queue refresh error", err);
         }
     };
 
-    const allItems = currentTask ? [currentTask, ...queue] : queue;
+    const activeUrls = Object.keys(taskStates);
+    // On affiche d'abord les tâches actives, puis le reste de la file
+    const activeTasks = queue.filter(t => activeUrls.includes(t.url));
+    const pendingTasks = queue.filter(t => !activeUrls.includes(t.url));
+    const allItems = [...activeTasks, ...pendingTasks];
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="File d'attente" fullScreen={true}>
@@ -62,56 +85,59 @@ const QueueModal = ({ isOpen, onClose }) => {
                 </div>
             ) : (
                 <div className="flex flex-col gap-6 pb-20">
-                    {allItems && allItems.map((item, index) => {
-                        if (!item) return null;
-                        const isCurrent = currentTask && item.url === currentTask.url && index === 0;
-                        const safeProgress = Math.min(Math.max(parseFloat(progress) || 0, 0), 100);
+                    {allItems.map((item, index) => {
+                        const state = taskStates[item.url] || {};
+                        const isActive = !!state.progress || activeUrls.includes(item.url);
                         
                         return (
-                        <div 
-                            key={`${index}-${item.url || index}`}
-                            className={`group relative border p-8 rounded-[40px] flex items-center gap-10 transition-all ${isCurrent ? 'bg-red-600/5 border-red-600/20' : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]'}`}
-                        >
-                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl ${isCurrent ? 'bg-red-600 text-white' : 'bg-red-600/10 text-red-500'}`}>
-                                {isCurrent ? <i className="fas fa-arrow-right animate-pulse"></i> : index + 1}
-                            </div>
-                            <img src={item.thumbnail || ''} className="w-48 aspect-video rounded-3xl object-cover shadow-2xl border border-white/5" alt="" />
-                            <div className="flex-1 min-w-0">
-                                <h3 className="text-xl font-bold text-white truncate mb-2">{item.title || 'Vidéo en cours...'}</h3>
-                                
-                                {isCurrent ? (
-                                    <div className="mt-4">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">{speed || 'Calcul...'} • {eta || '--:--'}</span>
-                                            <span className="text-[10px] font-black text-white">{Math.round(safeProgress)}%</span>
+                            <div 
+                                key={index}
+                                className={`group relative bg-white/[0.02] border border-white/5 p-8 rounded-[40px] flex items-center gap-8 transition-all ${isActive ? 'bg-white/[0.05] border-red-500/20' : ''}`}
+                            >
+                                <div className="relative w-24 h-24 rounded-[28px] overflow-hidden flex-shrink-0 shadow-2xl">
+                                    <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                    {isActive && (
+                                        <div className="absolute inset-0 bg-red-600/20 flex items-center justify-center">
+                                            <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                         </div>
-                                        <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                            <div 
-                                                className="h-full bg-gradient-to-r from-red-600 to-red-400 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all duration-300"
-                                                style={{ width: `${safeProgress}%` }}
-                                            />
-                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex-1 min-w-0 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-lg font-black text-white truncate pr-10">{item.title}</h4>
+                                        <span className="px-4 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-white/40">
+                                            {item.resolution}
+                                        </span>
                                     </div>
-                                ) : (
-                                    <div className="flex items-center gap-6">
-                                        <div className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-white/40">
-                                            <i className="fas fa-cog text-white/20"></i>
-                                            Format: <span className="text-white">{item.resolution || item.format_id || 'Auto'}</span>
+
+                                    {isActive ? (
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                                                <span className="text-red-500">{state.phase || 'Téléchargement'}</span>
+                                                <div className="flex items-center gap-4 text-white/40">
+                                                    <span>{state.speed}</span>
+                                                    <span>{state.eta}</span>
+                                                    <span className="text-white">{state.progress}%</span>
+                                                </div>
+                                            </div>
+                                            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                                                <div 
+                                                    className="h-full bg-red-600 transition-all duration-500 shadow-[0_0_15px_rgba(220,38,38,0.5)]"
+                                                    style={{ width: `${state.progress}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-white/40">
-                                            <i className="fas fa-folder"></i>
-                                            Dossier: <span className="text-white truncate max-w-[200px]">{item.folder || 'Défaut'}</span>
+                                    ) : (
+                                        <div className="flex items-center gap-3 text-white/20">
+                                            <i className="fas fa-clock text-[10px]"></i>
+                                            <span className="text-[10px] font-black uppercase tracking-widest">En attente...</span>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border ${isCurrent ? 'bg-red-600 text-white border-red-400 animate-pulse' : 'bg-red-600/10 text-red-500 border-red-600/20'}`}>
-                                    {isCurrent ? 'Téléchargement...' : 'En attente'}
+                                    )}
                                 </div>
                             </div>
-                        </div>
-                    )})}
+                        );
+                    })}
                 </div>
             )}
         </Modal>

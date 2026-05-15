@@ -112,6 +112,18 @@ const Navbar = ({ onOpenHistory, onOpenFavorites, onOpenQueue, onOpenMenu, immer
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 hidden xl:block">
                     ROY INDUSTRIE
                 </span>
+
+                <button 
+                    onClick={() => {
+                        const newState = !window.isMini;
+                        window.isMini = newState;
+                        callApi('toggle_mini_mode', newState);
+                    }}
+                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-white/20 hover:text-white hover:bg-white/10 transition-all"
+                    title="Mini Mode"
+                >
+                    <i className="fas fa-compress-alt"></i>
+                </button>
                 {immersionMode && (
                     <div className="flex items-center gap-1">
                         <button 

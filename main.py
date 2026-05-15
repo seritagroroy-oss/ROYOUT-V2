@@ -62,7 +62,8 @@ class Api:
         self.download_queue = []
         self.current_task = None
         self.queue_lock = threading.Lock()
-        
+        self.download_semaphore = threading.Semaphore(2) # Limite à 2 téléchargements simultanés
+        self.active_tasks = []
         self.last_folder = os.path.join(os.path.expanduser("~"), "Downloads")
         
         # Gestion de l'argument (clic droit Windows)
@@ -447,7 +448,11 @@ class Api:
 
     def get_queue(self):
         with self.queue_lock:
-            return {"current": self.current_task, "queue": self.download_queue}
+            return {
+                "active": self.active_tasks,
+                "queue": self.download_queue,
+                "count": len(self.download_queue)
+            }
 
     def _check_updates_ytdlp(self):
         try:
@@ -610,6 +615,14 @@ class Api:
     def close_window(self):
         if self._window: self._window.destroy()
 
+    def toggle_mini_mode(self, active):
+        if self._window:
+            if active:
+                self._window.resize(400, 300)
+            else:
+                self._window.resize(1280, 800)
+        return True
+
     def _js_safe(self, text):
         if not text: return ""
         return str(text).replace("'", "\\'").replace('"', '\\"').replace("\n", " ")
@@ -631,8 +644,9 @@ class Api:
                 speed = self._clean_str(d.get('_speed_str', '0 MB/s'))
                 eta = self._clean_str(d.get('_eta_str', '--:--'))
                 phase = "Audio" if "audio" in d.get('info_dict', {}).get('format', '').lower() else "Vidéo"
+                url = d.get('info_dict', {}).get('webpage_url')
                 if self._window:
-                    self._window.evaluate_js(f"if(window.updateProgress) window.updateProgress({percent}, '{speed}', '{eta}', '{phase}');")
+                    self._window.evaluate_js(f"if(window.updateProgress) window.updateProgress('{url}', {percent}, '{speed}', '{eta}', '{phase}');")
             except: pass
         elif d['status'] == 'finished':
             if self._window:
@@ -812,7 +826,6 @@ class Api:
         # Empêcher la mise en veille du PC pendant le téléchargement
         if sys.platform == 'win32':
             try:
-                # ES_CONTINUOUS | ES_SYSTEM_REQUIRED
                 ctypes.windll.kernel32.SetThreadExecutionState(0x80000000 | 0x00000001)
             except: pass
 
@@ -822,26 +835,31 @@ class Api:
                 if self.download_queue:
                     task = self.download_queue.pop(0)
                     if self._window: self._window.evaluate_js(f"if(window.updateQueueUI) window.updateQueueUI({len(self.download_queue)});")
-                    self.current_task = task
-                    self.is_downloading = True
                 else:
                     self.is_downloading = False
-                    self.current_task = None
-                    if self._window: 
-                        self._window.set_title("")
-                        self._window.evaluate_js("if(window.updateQueueUI) window.updateQueueUI(0);")
-                    
-                    # Autoriser à nouveau la mise en veille
+                    # Autoriser à nouveau la mise en veille si plus rien à faire
                     if sys.platform == 'win32':
-                        try:
-                            ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
+                        try: ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
                         except: pass
                     break
+
             if task:
-                if self._window: 
-                    js_call = f"if(window.resetProgress) window.resetProgress('{task['format_id']}', '{self._js_safe(task.get('title'))}', '{task.get('thumbnail') or ''}');"
-                    self._window.evaluate_js(js_call)
-                self._run_download(task['url'], task['format_id'], task['folder'], task.get('language'), task.get('options', {}))
+                self.is_downloading = True
+                # Lancer le téléchargement dans un thread avec semaphore
+                def worker(t):
+                    with self.download_semaphore:
+                        self.active_tasks.append(t)
+                        if self._window: 
+                            js_call = f"if(window.resetProgress) window.resetProgress('{t['url']}');"
+                            self._window.evaluate_js(js_call)
+                        
+                        self._run_download(t['url'], t['format_id'], t['folder'], t.get('language'), t.get('options', {}))
+                        
+                        self.active_tasks = [at for at in self.active_tasks if at['url'] != t['url']]
+
+                threading.Thread(target=worker, args=(task,), daemon=True).start()
+                # On attend un tout petit peu avant de prendre la suivante pour ne pas spammer les threads
+                time.sleep(0.5)
 
     def _run_download(self, url, format_id, folder, language=None, options=None):
         try:
@@ -894,11 +912,11 @@ class Api:
             if self._window:
                 self._add_to_history(meta.get('title', 'Vidéo'), meta.get('thumbnail', ''), format_id, target_folder)
                 self._window.set_title("")
-                self._window.evaluate_js("if(window.onDownloadComplete) onDownloadComplete('success', 'Terminé !')")
+                self._window.evaluate_js(f"if(window.onDownloadComplete) window.onDownloadComplete('{url}', 'success', 'Terminé !')")
         except Exception as e:
             self._log(f"ÉCHEC téléchargement: {e}")
-            if self._window: self._window.evaluate_js(f"if(window.onDownloadComplete) onDownloadComplete('error', 'Erreur')")
-        finally: self.is_downloading = False
+            if self._window: self._window.evaluate_js(f"if(window.onDownloadComplete) window.onDownloadComplete('{url}', 'error', 'Erreur')")
+        finally: pass
 
     def _parse_time(self, time_str):
         """Convertit MM:SS ou HH:MM:SS en secondes"""

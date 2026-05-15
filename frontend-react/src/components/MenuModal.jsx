@@ -250,6 +250,41 @@ const MenuModal = ({ isOpen, onClose }) => {
                             <p className="text-center text-[11px] text-white/20 italic leading-relaxed px-10">
                                 "Votre soutien, qu'il soit financier ou simplement un message d'encouragement, est le moteur de ce projet. Merci d'avance à tous ceux qui contribuent à faire grandir RoYout !"
                             </p>
+                            {/* Maintenance & Mises à jour */}
+                            <div className="space-y-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-1 bg-red-600 rounded-full"></div>
+                                    <h3 className="text-xl font-black text-white uppercase tracking-[0.2em]">Maintenance</h3>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <button 
+                                        onClick={() => callApi('check_for_updates')}
+                                        className="p-8 bg-white/[0.02] border border-white/5 rounded-[40px] flex items-center gap-6 hover:bg-white/[0.05] hover:border-white/10 transition-all group text-left"
+                                    >
+                                        <div className="w-16 h-16 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
+                                            <i className="fas fa-sync-alt"></i>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest">Application</p>
+                                            <p className="text-[10px] text-white/30">Rechercher une mise à jour</p>
+                                        </div>
+                                    </button>
+
+                                    <button 
+                                        onClick={() => callApi('_check_updates_ytdlp')}
+                                        className="p-8 bg-white/[0.02] border border-white/5 rounded-[40px] flex items-center gap-6 hover:bg-white/[0.05] hover:border-white/10 transition-all group text-left"
+                                    >
+                                        <div className="w-16 h-16 rounded-2xl bg-green-600/10 flex items-center justify-center text-green-500 group-hover:scale-110 transition-transform">
+                                            <i className="fas fa-bolt"></i>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest">Moteur (yt-dlp)</p>
+                                            <p className="text-[10px] text-white/30">Forcer la mise à jour du moteur</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 );
