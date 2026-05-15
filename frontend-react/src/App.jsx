@@ -67,12 +67,16 @@ function App() {
           'vsdark': '#1e1e1e', 'onedark': '#282c34', 'dracula': '#282a36', 'monokai': '#272822',
           'github': '#0d1117', 'nord': '#2e3440', 'solarized': '#002b36'
       };
+      const lightThemes = ['light', 'soft', 'frost', 'pearl', 'concrete', 'metal', 'soft'];
       const targetColor = bgColors[themeId] || '#0f0f0f';
-      document.body.style.backgroundColor = targetColor;
-      document.documentElement.style.backgroundColor = targetColor;
+      
       document.documentElement.style.setProperty('--theme-bg', targetColor);
-      if (themeId === 'light' || themeId === 'soft') document.documentElement.classList.add('light-mode');
-      else document.documentElement.classList.remove('light-mode');
+      
+      if (lightThemes.includes(themeId)) {
+          document.documentElement.classList.add('light-mode');
+      } else {
+          document.documentElement.classList.remove('light-mode');
+      }
     };
 
     if (isReady) {
@@ -171,16 +175,16 @@ function App() {
               transition={{ delay: 3.5 }}
               className="flex items-center justify-between mb-10"
             >
-              <h2 className="text-xl font-black uppercase tracking-[0.3em] text-white/40 flex items-center gap-4">
+              <h2 className="text-xl font-black uppercase tracking-[0.3em] text-[var(--theme-text-dim)] flex items-center gap-4">
                 <i className="fas fa-fire text-red-600 text-lg animate-pulse"></i>
                 <span>{discoveryTitle}</span>
               </h2>
               <div className="flex gap-2">
-                  {['Musique', 'Gaming', 'Funny', 'Films'].map(cat => (
+                   {['Musique', 'Gaming', 'Funny', 'Films'].map(cat => (
                       <button 
                         key={cat}
                         onClick={() => handleAnalyze(cat)}
-                        className="px-4 py-2 rounded-xl bg-white/5 hover:bg-red-600 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all border border-white/5"
+                        className="px-4 py-2 rounded-xl bg-[var(--theme-card)] hover:bg-red-600 hover:text-white text-[var(--theme-text-dim)] hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all border border-[var(--theme-border)] shadow-[var(--theme-shadow)]"
                       >
                           {cat}
                       </button>
@@ -202,7 +206,7 @@ function App() {
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ duration: 0.4, delay: 0.1 }}
                       onClick={() => handleAnalyze(video.url)}
-                      className="group cursor-pointer flex flex-col gap-4 p-4 rounded-[32px] bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-red-500/30 transition-all duration-500 relative"
+                      className="group cursor-pointer flex flex-col gap-4 p-4 rounded-[32px] bg-[var(--theme-card)] border border-[var(--theme-border)] hover:bg-[var(--theme-card-hover)] hover:border-red-500/30 transition-all duration-500 relative shadow-[var(--theme-shadow)]"
                     >
                       <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl">
                         <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -231,8 +235,8 @@ function App() {
                         </div>
                       </div>
                       <div className="px-2">
-                        <h3 className="text-[14px] font-bold text-white line-clamp-2 leading-snug group-hover:text-red-500 transition-colors">{video.title}</h3>
-                        <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-2 flex items-center gap-2">
+                        <h3 className="text-[14px] font-bold text-[var(--theme-text)] line-clamp-2 leading-snug group-hover:text-red-500 transition-colors">{video.title}</h3>
+                        <p className="text-[10px] text-[var(--theme-text-dim)] font-black uppercase tracking-widest mt-2 flex items-center gap-2">
                           <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
                           {video.uploader}
                         </p>
@@ -252,14 +256,14 @@ function App() {
               >
                   <button 
                     onClick={handleLoadMore}
-                    className="group flex items-center gap-8 px-16 py-8 bg-gradient-to-br from-white/[0.05] to-transparent hover:from-red-600 hover:to-red-500 border border-white/10 hover:border-red-500/50 rounded-[40px] transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-red-600/20 active:scale-95"
+                    className="group flex items-center gap-8 px-16 py-8 bg-gradient-to-br from-[var(--theme-card)] to-transparent hover:from-red-600 hover:to-red-500 border border-[var(--theme-border)] hover:border-red-500/50 rounded-[40px] transition-all duration-500 shadow-[var(--theme-shadow)] hover:shadow-red-600/20 active:scale-95"
                   >
                       <div className="flex flex-col items-start gap-1 text-left">
-                          <span className="text-[11px] font-black uppercase tracking-[0.5em] group-hover:text-white text-white/60 transition-colors">Afficher plus de vidéos</span>
-                          <span className="text-[8px] font-medium text-white/20 group-hover:text-white/60 uppercase tracking-widest transition-colors">Charger les résultats suivants</span>
+                          <span className="text-[11px] font-black uppercase tracking-[0.5em] group-hover:text-white text-[var(--theme-text-dim)] transition-colors">Afficher plus de vidéos</span>
+                          <span className="text-[8px] font-medium text-[var(--theme-text-dim)] opacity-40 group-hover:text-white/60 uppercase tracking-widest transition-colors">Charger les résultats suivants</span>
                       </div>
-                      <div className="w-12 h-12 rounded-full bg-white/5 group-hover:bg-white/20 flex items-center justify-center transition-all">
-                          <i className="fas fa-chevron-down text-sm opacity-40 group-hover:opacity-100 group-hover:animate-bounce text-white"></i>
+                      <div className="w-12 h-12 rounded-full bg-[var(--theme-card-hover)] group-hover:bg-white/20 flex items-center justify-center transition-all border border-[var(--theme-border)]">
+                          <i className="fas fa-chevron-down text-sm opacity-40 group-hover:opacity-100 group-hover:animate-bounce text-[var(--theme-text)] group-hover:text-white"></i>
                       </div>
                   </button>
               </motion.div>
@@ -300,8 +304,8 @@ function App() {
       />
 
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-600/5 blur-[150px] rounded-full animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/5 blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-600/5 blur-[150px] rounded-full animate-pulse ambiance-glow"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/5 blur-[150px] rounded-full animate-pulse ambiance-glow" style={{ animationDelay: '2s' }}></div>
       </div>
     </div>
   )

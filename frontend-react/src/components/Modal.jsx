@@ -34,30 +34,30 @@ const Modal = ({ isOpen, onClose, title, children, fullScreen = false, maxWidth 
                         <div 
                             className={`
                                 w-full flex flex-col pointer-events-auto overflow-hidden
-                                ${fullScreen ? 'h-full' : `${maxWidth} max-h-[85vh] border border-white/10 rounded-[40px] shadow-2xl`}
+                                ${fullScreen ? 'h-full' : `${maxWidth} max-h-[85vh] border border-[var(--theme-border)] rounded-[40px] shadow-[var(--theme-shadow)]`}
                             `}
                             style={{ backgroundColor: 'var(--theme-bg, #0f0f0f)' }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Header */}
-                            <div className={`px-8 py-2 border-b border-white/5 flex items-center justify-between bg-white/[0.02] ${fullScreen ? 'pt-4' : ''}`}>
+                            <div className={`px-8 py-2 border-b border-[var(--theme-border)] flex items-center justify-between bg-[var(--theme-card)] ${fullScreen ? 'pt-4' : ''}`}>
                                 <div>
-                                    <h2 className="text-xl font-black uppercase tracking-[0.2em] text-white flex items-center gap-3">
+                                    <h2 className="text-xl font-black uppercase tracking-[0.2em] text-[var(--theme-text)] flex items-center gap-3">
                                         <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
                                         {title}
                                     </h2>
-                                    {fullScreen && <p className="text-[8px] text-white/20 uppercase tracking-[0.4em] font-black mt-1">Expérience RoYout Premium</p>}
+                                    {fullScreen && <p className="text-[8px] text-[var(--theme-text-dim)] uppercase tracking-[0.4em] font-black mt-1">Expérience RoYout Premium</p>}
                                 </div>
                                 <button 
                                     onClick={onClose}
-                                    className="w-10 h-10 rounded-xl bg-white/5 hover:bg-red-600 hover:scale-110 flex items-center justify-center text-white/40 hover:text-white transition-all shadow-xl"
+                                    className="w-10 h-10 rounded-xl bg-[var(--theme-card-hover)] hover:bg-red-600 hover:scale-110 flex items-center justify-center text-[var(--theme-text-dim)] hover:text-white transition-all shadow-xl"
                                 >
                                     <i className="fas fa-times text-sm"></i>
                                 </button>
                             </div>
 
                             {/* Body */}
-                            <div className="flex-1 overflow-y-auto p-8 lg:p-12 custom-scrollbar">
+                            <div className="flex-1 overflow-y-auto p-8 lg:p-12 custom-scrollbar text-[var(--theme-text)]">
                                 <div className={`${fullScreen ? 'max-w-6xl mx-auto w-full' : ''}`}>
                                     {children}
                                 </div>

@@ -27,7 +27,7 @@ const HistoryModal = ({ isOpen, onClose }) => {
             {/* Barre de recherche */}
             <div className="mb-10 max-w-2xl mx-auto">
                 <div className="relative group">
-                    <div className="absolute inset-y-0 left-6 flex items-center text-white/20 group-focus-within:text-red-500 transition-colors">
+                    <div className="absolute inset-y-0 left-6 flex items-center text-[var(--theme-text-dim)] group-focus-within:text-red-500 transition-colors">
                         <i className="fas fa-search text-lg"></i>
                     </div>
                     <input 
@@ -35,7 +35,7 @@ const HistoryModal = ({ isOpen, onClose }) => {
                         placeholder="Rechercher dans vos téléchargements..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-white/[0.02] border border-white/5 rounded-[32px] py-6 pl-16 pr-8 text-sm font-bold text-white focus:bg-white/[0.04] focus:border-red-500/50 outline-none transition-all shadow-inner"
+                        className="w-full bg-[var(--theme-card)] border border-[var(--theme-border)] rounded-[32px] py-6 pl-16 pr-8 text-sm font-bold text-[var(--theme-text)] focus:bg-[var(--theme-card-hover)] focus:border-red-500/50 outline-none transition-all shadow-inner"
                     />
                 </div>
             </div>
@@ -50,20 +50,20 @@ const HistoryModal = ({ isOpen, onClose }) => {
                     {filteredHistory.map((item, index) => (
                         <div 
                             key={item.id || index}
-                            className="group relative bg-white/[0.02] border border-white/5 p-8 rounded-[40px] flex items-center gap-8 hover:bg-white/[0.05] transition-all hover:border-red-500/20"
+                            className="group relative bg-[var(--theme-card)] border border-[var(--theme-border)] p-8 rounded-[40px] flex items-center gap-8 hover:bg-[var(--theme-card-hover)] transition-all hover:border-red-500/20 shadow-[var(--theme-shadow)]"
                         >
-                            <img src={item.thumbnail} className="w-56 aspect-video rounded-[24px] object-cover shadow-2xl border border-white/5" alt="" />
+                            <img src={item.thumbnail} className="w-56 aspect-video rounded-[24px] object-cover shadow-2xl border border-[var(--theme-border)]" alt="" />
                             <div className="flex-1 min-w-0">
-                                <h3 className="text-xl font-bold text-white truncate mb-2">{item.title}</h3>
+                                <h3 className="text-xl font-bold text-[var(--theme-text)] truncate mb-2">{item.title}</h3>
                                 <div className="flex items-center gap-4 text-[10px] uppercase tracking-[0.2em] font-black">
                                     <span className="text-red-500 bg-red-500/10 px-2 py-0.5 rounded-md">{item.resolution}</span>
-                                    <span className="text-white/40">{item.date}</span>
+                                    <span className="text-[var(--theme-text-dim)]">{item.date}</span>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-3">
                                 <button 
                                     onClick={() => openFolder(item.folder)}
-                                    className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all shadow-xl" 
+                                    className="w-14 h-14 rounded-2xl bg-[var(--theme-card-hover)] hover:bg-white/10 flex items-center justify-center text-[var(--theme-text-dim)] hover:text-white transition-all shadow-xl border border-[var(--theme-border)]" 
                                     title="Ouvrir le dossier"
                                 >
                                     <i className="fas fa-folder-open text-lg"></i>

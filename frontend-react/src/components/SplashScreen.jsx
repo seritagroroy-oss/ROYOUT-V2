@@ -18,7 +18,8 @@ const SplashScreen = () => {
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0, scale: 1.1 }}
                     transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className="fixed inset-0 z-[500] bg-[#0f0f0f] flex flex-col items-center justify-center"
+                    className="fixed inset-0 z-[500] flex flex-col items-center justify-center"
+                    style={{ backgroundColor: 'var(--theme-bg, #0f0f0f)' }}
                 >
                     <div className="relative mb-12">
                         {/* Glow background */}

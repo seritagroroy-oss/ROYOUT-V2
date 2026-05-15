@@ -22,11 +22,11 @@ const FavoritesModal = ({ isOpen, onClose, onAnalyze }) => {
                     {favorites.map((f, index) => (
                         <div 
                             key={f.url || index}
-                            className="group relative bg-white/[0.02] border border-white/5 p-6 rounded-[40px] flex flex-col gap-6 hover:bg-white/[0.05] transition-all hover:border-red-500/20"
+                            className="group relative bg-[var(--theme-card)] border border-[var(--theme-border)] p-6 rounded-[40px] flex flex-col gap-6 hover:bg-[var(--theme-card-hover)] transition-all hover:border-red-500/20 shadow-[var(--theme-shadow)]"
                         >
-                            <div className="relative aspect-video rounded-[24px] overflow-hidden shadow-2xl border border-white/5">
+                            <div className="relative aspect-video rounded-[24px] overflow-hidden shadow-2xl border border-[var(--theme-border)]">
                                 <img src={f.thumbnail} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
-                                <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-black border border-white/10">{f.duration}</div>
+                                <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-black border border-white/10 text-white">{f.duration}</div>
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button 
                                         onClick={() => handleAnalyze(f.url)}
@@ -38,12 +38,12 @@ const FavoritesModal = ({ isOpen, onClose, onAnalyze }) => {
                             </div>
                             <div className="px-2 flex items-center justify-between gap-4">
                                 <div className="min-w-0">
-                                    <h3 className="text-lg font-bold text-white truncate mb-1 group-hover:text-red-500 transition-colors">{f.title}</h3>
-                                    <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.3em]">YouTube Premium Content</p>
+                                    <h3 className="text-lg font-bold text-[var(--theme-text)] truncate mb-1 group-hover:text-red-500 transition-colors">{f.title}</h3>
+                                    <p className="text-[10px] text-[var(--theme-text-dim)] font-black uppercase tracking-[0.3em]">YouTube Premium Content</p>
                                 </div>
                                 <button 
                                     onClick={() => toggleFavorite(f)}
-                                    className="w-12 h-12 rounded-2xl bg-white/5 hover:bg-red-600/20 flex items-center justify-center text-white/10 hover:text-red-500 transition-all shrink-0" 
+                                    className="w-12 h-12 rounded-2xl bg-[var(--theme-card-hover)] hover:bg-red-600/20 flex items-center justify-center text-[var(--theme-text-dim)] hover:text-red-500 transition-all shrink-0 border border-[var(--theme-border)]" 
                                     title="Supprimer"
                                 >
                                     <i className="fas fa-trash-alt"></i>

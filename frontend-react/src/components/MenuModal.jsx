@@ -248,7 +248,7 @@ const MenuModal = ({ isOpen, onClose }) => {
                                 </div>
                             </div>
 
-                            <p className="text-center text-[11px] text-white/20 italic leading-relaxed px-10">
+                            <p className="text-center text-[11px] text-[var(--theme-text-dim)] italic leading-relaxed px-10">
                                 "Votre soutien, qu'il soit financier ou simplement un message d'encouragement, est le moteur de ce projet. Merci d'avance à tous ceux qui contribuent à faire grandir RoYout !"
                             </p>
                         </div>
@@ -263,14 +263,14 @@ const MenuModal = ({ isOpen, onClose }) => {
                                 <button 
                                     key={index}
                                     onClick={() => handleAction(item)}
-                                    className="p-10 rounded-[48px] bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 transition-all text-left group shadow-xl flex items-center gap-8"
+                                    className="p-10 rounded-[48px] bg-[var(--theme-card)] hover:bg-[var(--theme-card-hover)] border border-[var(--theme-border)] transition-all text-left group shadow-[var(--theme-shadow)] flex items-center gap-8"
                                 >
-                                    <div className={`w-14 h-14 rounded-2xl ${item.color}/10 flex items-center justify-center text-white/20 group-hover:bg-red-600 group-hover:text-white transition-all`}>
+                                    <div className={`w-14 h-14 rounded-2xl ${item.color}/10 flex items-center justify-center text-[var(--theme-text-dim)] group-hover:bg-red-600 group-hover:text-white transition-all`}>
                                         <i className={`fas ${item.icon} text-xl`}></i>
                                     </div>
                                     <div>
-                                        <p className="font-black uppercase tracking-[0.2em] text-[11px] text-white/90 group-hover:text-white">{item.title}</p>
-                                        <p className="text-[9px] text-white/20 group-hover:text-white/40 mt-1">{item.desc}</p>
+                                        <p className="font-black uppercase tracking-[0.2em] text-[11px] text-[var(--theme-text)] group-hover:text-[var(--theme-text)]">{item.title}</p>
+                                        <p className="text-[9px] text-[var(--theme-text-dim)] group-hover:text-[var(--theme-text-dim)] mt-1">{item.desc}</p>
                                     </div>
                                 </button>
                             ))}
@@ -279,13 +279,13 @@ const MenuModal = ({ isOpen, onClose }) => {
                         {/* Section Thème */}
                         <section className="space-y-8">
                             <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-red-500 text-center">Nuances de Thème</h4>
-                            <div className="p-10 rounded-[48px] bg-white/[0.02] border border-white/5 shadow-inner">
+                            <div className="p-10 rounded-[48px] bg-[var(--theme-card)] border border-[var(--theme-border)] shadow-inner">
                                 <div className="grid grid-cols-5 md:grid-cols-10 gap-6">
                                     {themes.map((t, i) => (
                                         <div key={i} className="relative group/theme">
                                             <button 
                                                 onClick={() => callApi('set_theme', t.id)}
-                                                className={`w-full aspect-square rounded-full border-2 transition-all shadow-2xl hover:scale-125 ${t.recommended ? 'border-red-500/50 shadow-[0_0_15px_rgba(220,38,38,0.3)]' : 'border-white/10 hover:border-red-600'}`}
+                                                className={`w-full aspect-square rounded-full border-2 transition-all shadow-2xl hover:scale-125 ${t.recommended ? 'border-red-500/50 shadow-[0_0_15px_rgba(220,38,38,0.3)]' : 'border-[var(--theme-border)] hover:border-red-600'}`}
                                                 style={{ backgroundColor: t.color }}
                                                 title={t.name}
                                             />
@@ -302,46 +302,46 @@ const MenuModal = ({ isOpen, onClose }) => {
                         <section className="space-y-10">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-1 bg-red-600 rounded-full"></div>
-                                <h3 className="text-xl font-black text-white uppercase tracking-[0.2em]">Maintenance & Moteur</h3>
+                                <h3 className="text-xl font-black text-[var(--theme-text)] uppercase tracking-[0.2em]">Maintenance & Moteur</h3>
                             </div>
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <button 
                                     onClick={() => callApi('check_for_updates')}
-                                    className="p-8 bg-white/[0.02] border border-white/5 rounded-[40px] flex items-center gap-6 hover:bg-white/[0.05] hover:border-white/10 transition-all group text-left"
+                                    className="p-8 bg-[var(--theme-card)] border border-[var(--theme-border)] rounded-[40px] flex items-center gap-6 hover:bg-[var(--theme-card-hover)] hover:border-red-500/30 transition-all group text-left shadow-[var(--theme-shadow)]"
                                 >
                                     <div className="w-16 h-16 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
                                         <i className="fas fa-sync-alt"></i>
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-white uppercase tracking-widest">Application</p>
-                                        <p className="text-[10px] text-white/30">Rechercher une mise à jour</p>
+                                        <p className="text-[10px] font-black text-[var(--theme-text)] uppercase tracking-widest">Application</p>
+                                        <p className="text-[10px] text-[var(--theme-text-dim)]">Rechercher une mise à jour</p>
                                     </div>
                                 </button>
 
                                 <button 
                                     onClick={() => callApi('update_engine')}
-                                    className="p-8 bg-white/[0.02] border border-white/5 rounded-[40px] flex items-center gap-6 hover:bg-white/[0.05] hover:border-white/10 transition-all group text-left"
+                                    className="p-8 bg-[var(--theme-card)] border border-[var(--theme-border)] rounded-[40px] flex items-center gap-6 hover:bg-[var(--theme-card-hover)] hover:border-red-500/30 transition-all group text-left shadow-[var(--theme-shadow)]"
                                 >
                                     <div className="w-16 h-16 rounded-2xl bg-green-600/10 flex items-center justify-center text-green-500 group-hover:scale-110 transition-transform">
                                         <i className="fas fa-bolt"></i>
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <p className="text-[10px] font-black text-white uppercase tracking-widest">Moteur (yt-dlp)</p>
+                                            <p className="text-[10px] font-black text-[var(--theme-text)] uppercase tracking-widest">Moteur (yt-dlp)</p>
                                             <span className="text-[7px] bg-green-500/20 text-green-500 px-2 py-0.5 rounded-full font-black uppercase">Recommandé</span>
                                         </div>
-                                        <p className="text-[10px] text-white/30">Forcer la mise à jour du moteur</p>
+                                        <p className="text-[10px] text-[var(--theme-text-dim)]">Forcer la mise à jour du moteur</p>
                                     </div>
                                 </button>
                             </div>
                         </section>
 
                         <div className="flex flex-col items-center gap-6">
-                            <button onClick={() => callApi('view_logs')} className="text-[10px] font-black uppercase tracking-[0.5em] opacity-20 hover:opacity-100 hover:text-orange-500 transition-all">
+                            <button onClick={() => callApi('view_logs')} className="text-[10px] font-black uppercase tracking-[0.5em] text-[var(--theme-text-dim)] hover:text-orange-500 transition-all">
                                 Afficher les Logs Système
                             </button>
-                            <div className="text-[8px] font-black uppercase tracking-[0.4em] opacity-10">RoYout Engine v2.0.0 • royout.vercel.app</div>
+                            <div className="text-[8px] font-black uppercase tracking-[0.4em] text-[var(--theme-text-dim)] opacity-30">RoYout Engine v2.0.0 • royout.vercel.app</div>
                         </div>
                     </div>
                 );

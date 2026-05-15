@@ -75,13 +75,13 @@ const QueueModal = ({ isOpen, onClose }) => {
         <Modal isOpen={isOpen} onClose={onClose} title="File d'attente" fullScreen={true}>
             {isLoading && allItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-40 gap-6">
-                    <div className="w-20 h-20 border-4 border-white/5 border-t-red-600 rounded-full animate-spin"></div>
-                    <p className="text-sm font-black uppercase tracking-[0.3em] text-white/20">Synchronisation...</p>
+                    <div className="w-20 h-20 border-4 border-[var(--theme-border)] border-t-red-600 rounded-full animate-spin"></div>
+                    <p className="text-sm font-black uppercase tracking-[0.3em] text-[var(--theme-text-dim)]">Synchronisation...</p>
                 </div>
             ) : allItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-40 opacity-20">
-                    <i className="fas fa-list-ol text-[120px] mb-10"></i>
-                    <p className="text-2xl font-black uppercase tracking-[0.5em]">La file est vide</p>
+                    <i className="fas fa-list-ol text-[120px] mb-10 text-[var(--theme-text)]"></i>
+                    <p className="text-2xl font-black uppercase tracking-[0.5em] text-[var(--theme-text)]">La file est vide</p>
                 </div>
             ) : (
                 <div className="flex flex-col gap-6 pb-20">
@@ -92,7 +92,7 @@ const QueueModal = ({ isOpen, onClose }) => {
                         return (
                             <div 
                                 key={index}
-                                className={`group relative bg-white/[0.02] border border-white/5 p-8 rounded-[40px] flex items-center gap-8 transition-all ${isActive ? 'bg-white/[0.05] border-red-500/20' : ''}`}
+                                className={`group relative bg-[var(--theme-card)] border border-[var(--theme-border)] p-8 rounded-[40px] flex items-center gap-8 transition-all shadow-[var(--theme-shadow)] ${isActive ? 'bg-[var(--theme-card-hover)] border-red-500/20' : ''}`}
                             >
                                 <div className="relative w-24 h-24 rounded-[28px] overflow-hidden flex-shrink-0 shadow-2xl">
                                     <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
@@ -105,8 +105,8 @@ const QueueModal = ({ isOpen, onClose }) => {
 
                                 <div className="flex-1 min-w-0 space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <h4 className="text-lg font-black text-white truncate pr-10">{item.title}</h4>
-                                        <span className="px-4 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-white/40">
+                                        <h4 className="text-lg font-black text-[var(--theme-text)] truncate pr-10">{item.title}</h4>
+                                        <span className="px-4 py-1 bg-[var(--theme-card-hover)] border border-[var(--theme-border)] rounded-full text-[10px] font-black uppercase tracking-widest text-[var(--theme-text-dim)]">
                                             {item.resolution}
                                         </span>
                                     </div>
@@ -115,13 +115,13 @@ const QueueModal = ({ isOpen, onClose }) => {
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
                                                 <span className="text-red-500">{state.phase || 'Téléchargement'}</span>
-                                                <div className="flex items-center gap-4 text-white/40">
+                                                <div className="flex items-center gap-4 text-[var(--theme-text-dim)]">
                                                     <span>{state.speed}</span>
                                                     <span>{state.eta}</span>
-                                                    <span className="text-white">{state.progress}%</span>
+                                                    <span className="text-[var(--theme-text)]">{state.progress}%</span>
                                                 </div>
                                             </div>
-                                            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                                            <div className="h-2 bg-[var(--theme-card-hover)] rounded-full overflow-hidden border border-[var(--theme-border)]">
                                                 <div 
                                                     className="h-full bg-red-600 transition-all duration-500 shadow-[0_0_15px_rgba(220,38,38,0.5)]"
                                                     style={{ width: `${state.progress}%` }}
@@ -129,7 +129,7 @@ const QueueModal = ({ isOpen, onClose }) => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="flex items-center gap-3 text-white/20">
+                                        <div className="flex items-center gap-3 text-[var(--theme-text-dim)] opacity-40">
                                             <i className="fas fa-clock text-[10px]"></i>
                                             <span className="text-[10px] font-black uppercase tracking-widest">En attente...</span>
                                         </div>
