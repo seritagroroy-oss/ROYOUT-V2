@@ -711,17 +711,20 @@ class Api:
             self._log(f"Erreur analyse URL : {e}")
             
             # Traduction intelligente des erreurs courantes
-            friendly_msg = "Impossible d'analyser ce lien. Vérifiez votre connexion."
+            friendly_msg = None
             if "incomplete youtube id" in error_msg or "unsupported url" in error_msg:
                 friendly_msg = "Le lien YouTube semble incorrect ou incomplet."
             elif "not available" in error_msg or "unavailable" in error_msg or "private" in error_msg:
                 friendly_msg = "Cette vidéo est privée ou n'est plus disponible sur YouTube."
             elif "sign in" in error_msg or "confirm your age" in error_msg:
-                friendly_msg = "Cette vidéo nécessite une connexion (limite d'âge)."
+                friendly_msg = "Cette vidéo nécessite une connexion (limite d'âge). Essayez une autre vidéo."
             elif "geo-restricted" in error_msg or "region" in error_msg:
                 friendly_msg = "Cette vidéo n'est pas disponible dans votre région."
+            elif "timeout" in error_msg:
+                friendly_msg = "Le serveur a mis trop de temps à répondre. Réessayez."
             
-            return {"status": "error", "message": friendly_msg}
+            final_msg = friendly_msg if friendly_msg else f"Erreur YouTube : {str(e)[:100]}"
+            return {"status": "error", "message": final_msg}
         finally:
             with self._lock_analyzing:
                 if url in self._analyzing_urls:
