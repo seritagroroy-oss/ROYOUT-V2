@@ -171,40 +171,85 @@ const MenuModal = ({ isOpen, onClose }) => {
                 );
             case 'support':
                 return (
-                    <div className="flex flex-col gap-10 animate-in fade-in duration-500">
-                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all">
+                    <div className="flex flex-col gap-10 animate-in fade-in duration-500 max-h-[80vh] overflow-y-auto pr-4 custom-scrollbar pb-20">
+                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 bg-[#0f0f0f] z-10 py-4">
                             <i className="fas fa-arrow-left"></i> Retour
                         </button>
-                        <div className="max-w-4xl mx-auto w-full p-16 bg-white/[0.02] rounded-[60px] border border-white/5 text-center space-y-12">
-                            <div className="w-24 h-24 bg-red-600/10 rounded-full flex items-center justify-center mx-auto border border-red-600/20 shadow-[0_0_50px_rgba(220,38,38,0.1)]">
-                                <i className="fas fa-heart text-4xl text-red-500 animate-pulse"></i>
-                            </div>
-                            <div className="space-y-4">
-                                <h3 className="text-4xl font-black text-white">Soutenir le Projet</h3>
-                                <p className="text-white/40 max-w-xl mx-auto leading-relaxed">
-                                    RoYout est un projet indépendant et gratuit. Votre soutien aide à maintenir les serveurs et à financer le développement continu de nouvelles fonctionnalités.
+                        
+                        <div className="max-w-4xl mx-auto w-full space-y-12">
+                            <div className="text-center space-y-6">
+                                <div className="w-20 h-20 bg-red-600/10 rounded-full flex items-center justify-center mx-auto border border-red-600/20">
+                                    <i className="fas fa-heart text-3xl text-red-500 animate-pulse"></i>
+                                </div>
+                                <h3 className="text-4xl font-black text-white">Soutenir le projet RoYout</h3>
+                                <p className="text-white/40 leading-relaxed max-w-2xl mx-auto">
+                                    RoYout est un projet indépendant développé, maintenu et mis à jour bénévolement par <b className="text-white">SERI TAGRO ROY</b>. L'application restera toujours 100% gratuite et sans publicité.
                                 </p>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <button className="p-8 rounded-[32px] bg-white/[0.03] border border-white/5 hover:border-red-500/30 transition-all flex flex-col items-center gap-4 group">
-                                    <div className="w-12 h-12 rounded-xl bg-orange-500/20 text-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <i className="fas fa-coffee"></i>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {[
+                                    { icon: "fa-rocket", t: "Serveurs", d: "Améliorer la vitesse des téléchargements." },
+                                    { icon: "fa-tools", t: "Maintenance", d: "Adapter le code aux mises à jour des plateformes." },
+                                    { icon: "fa-laptop", t: "Évolutions", d: "Investir dans une version mobile ou Mac." }
+                                ].map((item, i) => (
+                                    <div key={i} className="p-8 rounded-[32px] bg-white/[0.02] border border-white/5 text-center space-y-4">
+                                        <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto text-white/20">
+                                            <i className={`fas ${item.icon} text-xl`}></i>
+                                        </div>
+                                        <p className="text-xs font-black text-white uppercase tracking-widest">{item.t}</p>
+                                        <p className="text-[10px] text-white/30 leading-relaxed">{item.desc || item.d}</p>
                                     </div>
-                                    <div>
-                                        <p className="font-black text-white uppercase text-xs tracking-widest">Buy me a coffee</p>
-                                        <p className="text-[10px] text-white/20 mt-1">Donation Internationale</p>
-                                    </div>
-                                </button>
-                                <button className="p-8 rounded-[32px] bg-white/[0.03] border border-white/5 hover:border-red-500/30 transition-all flex flex-col items-center gap-4 group">
-                                    <div className="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <i className="fas fa-mobile-alt"></i>
-                                    </div>
-                                    <div>
-                                        <p className="font-black text-white uppercase text-xs tracking-widest">Orange Money / Moov</p>
-                                        <p className="text-[10px] text-white/20 mt-1">Soutien Local (CI)</p>
-                                    </div>
-                                </button>
+                                ))}
                             </div>
+
+                            <div className="space-y-8">
+                                <h4 className="text-center text-[10px] font-black uppercase tracking-[0.4em] text-red-500">Comment contribuer ?</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* International */}
+                                    <div className="p-10 rounded-[40px] bg-white/[0.02] border border-white/5 space-y-6">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/20">International</p>
+                                        <div className="space-y-4">
+                                            <button className="w-full p-6 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-between group hover:bg-orange-500 transition-all">
+                                                <div className="flex items-center gap-4 text-orange-500 group-hover:text-white">
+                                                    <i className="fas fa-coffee"></i>
+                                                    <span className="text-xs font-black uppercase tracking-widest">Buy me a coffee</span>
+                                                </div>
+                                                <i className="fas fa-external-link-alt text-[10px] opacity-40 group-hover:text-white"></i>
+                                            </button>
+                                            <button className="w-full p-6 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-between group hover:bg-blue-500 transition-all">
+                                                <div className="flex items-center gap-4 text-blue-500 group-hover:text-white">
+                                                    <i className="fab fa-paypal"></i>
+                                                    <span className="text-xs font-black uppercase tracking-widest">PayPal</span>
+                                                </div>
+                                                <i className="fas fa-external-link-alt text-[10px] opacity-40 group-hover:text-white"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Local */}
+                                    <div className="p-10 rounded-[40px] bg-white/[0.02] border border-white/5 space-y-6">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/20">Côte d'Ivoire (Mobile Money)</p>
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {[
+                                                { n: "MTN Money", v: "05 54 37 75 07", c: "text-yellow-500" },
+                                                { n: "Orange Money", v: "07 67 17 45 41", c: "text-orange-600" },
+                                                { n: "Moov Money", v: "01 40 94 59 41", c: "text-blue-400" },
+                                                { n: "Wave", v: "05 54 37 75 07", c: "text-blue-600" }
+                                            ].map((m, i) => (
+                                                <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.01] border border-white/5">
+                                                    <span className={`text-[10px] font-black uppercase tracking-widest ${m.c}`}>{m.n}</span>
+                                                    <span className="text-sm font-black text-white mono">{m.v}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="text-center text-[11px] text-white/20 italic leading-relaxed px-10">
+                                "Votre soutien, qu'il soit financier ou simplement un message d'encouragement, est le moteur de ce projet. Merci d'avance à tous ceux qui contribuent à faire grandir RoYout !"
+                            </p>
                         </div>
                     </div>
                 );
