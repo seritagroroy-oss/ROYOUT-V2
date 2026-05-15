@@ -355,10 +355,17 @@ class Api:
         if not os.path.exists(self.settings_file):
             default_settings = {
                 "last_update_notification": 0,
-                "theme": "dark"
+                "theme": "dark",
+                "font_size": 100,
+                "download_folder": os.path.join(os.path.expanduser("~"), "Downloads")
             }
             with open(self.settings_file, 'w', encoding='utf-8') as f:
                 json.dump(default_settings, f, indent=4)
+        else:
+            # Charger le dossier s'il existe
+            s = self._get_settings()
+            if s.get("download_folder"):
+                self.last_folder = s["download_folder"]
 
     def _get_settings(self):
         try:
@@ -373,6 +380,22 @@ class Api:
             with open(self.settings_file, 'w', encoding='utf-8') as f:
                 json.dump(settings, f, indent=4)
         except: pass
+
+    def get_all_settings(self):
+        """Retourne tous les réglages pour initialisation frontend"""
+        s = self._get_settings()
+        s["download_folder"] = self.last_folder.replace("\\", "/")
+        if "font_size" not in s: s["font_size"] = 100
+        return s
+
+    def update_setting(self, key, value):
+        """Met à jour un réglage spécifique"""
+        s = self._get_settings()
+        s[key] = value
+        if key == "download_folder":
+            self.last_folder = value
+        self._save_settings(s)
+        return True
 
     def _log(self, message):
         """Écrit dans la console et dans le fichier de log"""
@@ -544,6 +567,7 @@ class Api:
         result = self._window.create_file_dialog(webview.FOLDER_DIALOG)
         if result:
             self.last_folder = result[0]
+            self.update_setting("download_folder", result[0])
             return result[0]
         return None
 
@@ -567,8 +591,9 @@ class Api:
         except: pass
 
     def set_theme(self, theme):
-        """Reçoit le thème de l'UI (peut être étendu pour persistance)"""
+        """Applique et sauvegarde le thème"""
         self._log(f"Changement de thème vers : {theme}")
+        self.update_setting("theme", theme)
         if self._window:
             self._window.evaluate_js(f"if(window.applyTheme) window.applyTheme('{theme}');")
         return True

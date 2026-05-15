@@ -10,11 +10,15 @@ export const AppProvider = ({ children }) => {
     const [queueCount, setQueueCount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [fontSize, setFontSize] = useState(100);
+    const [settings, setSettings] = useState(null);
+
+    const [currentFolder, setCurrentFolder] = useState('');
 
     // Charger les données initiales dès que l'API est prête
     useEffect(() => {
         if (isReady) {
             loadInitialData();
+            loadSettings();
             
             // Écouter les mises à jour depuis le backend
             window.updateQueueUI = (count) => setQueueCount(count);
@@ -24,7 +28,8 @@ export const AppProvider = ({ children }) => {
     // Appliquer le zoom sur le document
     useEffect(() => {
         document.documentElement.style.fontSize = `${(fontSize / 100) * 16}px`;
-    }, [fontSize]);
+        if (isReady) callApi('update_setting', 'font_size', fontSize);
+    }, [fontSize, isReady]);
 
     const loadInitialData = async () => {
         try {
@@ -35,6 +40,25 @@ export const AppProvider = ({ children }) => {
         } catch (err) {
             console.error("Failed to load initial data", err);
         }
+    };
+
+    const loadSettings = async () => {
+        try {
+            const s = await callApi('get_all_settings');
+            if (s) {
+                setSettings(s);
+                if (s.font_size) setFontSize(s.font_size);
+                if (s.theme && window.applyTheme) window.applyTheme(s.theme);
+                if (s.download_folder) setCurrentFolder(s.download_folder);
+            }
+        } catch (err) {
+            console.error("Failed to load settings", err);
+        }
+    };
+
+    const handleSelectFolder = async () => {
+        const folder = await callApi('select_folder');
+        if (folder) setCurrentFolder(folder);
     };
 
     const toggleFavorite = async (video) => {
@@ -63,7 +87,9 @@ export const AppProvider = ({ children }) => {
             resetFontSize,
             toggleFavorite,
             loadInitialData,
-            isReady
+            isReady,
+            currentFolder,
+            handleSelectFolder
         }}>
             {children}
         </AppContext.Provider>
