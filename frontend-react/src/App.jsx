@@ -98,14 +98,19 @@ function App() {
     loadDiscovery(currentQuery, nextPage, true);
   };
 
+  const handleSearch = (query) => {
+    if (!query) return;
+    setDiscoveryTitle(`Résultats pour : ${query}`);
+    setCurrentQuery(query);
+    loadDiscovery(query, 1, false);
+  };
+
   const handleAnalyze = (query) => {
     if (query.includes('youtube.com/') || query.includes('youtu.be/')) {
        setActiveVideoUrl(query);
        openExclusiveModal('preview');
     } else {
-       setCurrentQuery(query);
-       setDiscoveryTitle(`Résultats pour : ${query}`);
-       loadDiscovery(query, 1, false);
+       handleSearch(query);
     }
   };
 
