@@ -8,9 +8,25 @@ const QueueModal = ({ isOpen, onClose }) => {
     const { queueCount } = useAppState();
     const [queue, setQueue] = useState([]);
     const [currentTask, setCurrentTask] = useState(null);
+    const [progress, setProgress] = useState(0);
+    const [speed, setSpeed] = useState('');
+    const [eta, setEta] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        // Branchement global pour recevoir la progression du backend
+        window.updateProgress = (p, s, e) => {
+            setProgress(p);
+            setSpeed(s);
+            setEta(e);
+        };
+
+        window.resetProgress = () => {
+            setProgress(0);
+            setSpeed('');
+            setEta('');
+        };
+
         if (isOpen) {
             loadQueue();
             const interval = setInterval(loadQueue, 2000);
@@ -59,16 +75,33 @@ const QueueModal = ({ isOpen, onClose }) => {
                             <img src={item.thumbnail} className="w-48 aspect-video rounded-3xl object-cover shadow-2xl border border-white/5" alt="" />
                             <div className="flex-1 min-w-0">
                                 <h3 className="text-xl font-bold text-white truncate mb-2">{item.title}</h3>
-                                <div className="flex items-center gap-6">
-                                    <div className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-white/40">
-                                        <i className={`fas ${isCurrent ? 'fa-spinner fa-spin text-red-500' : 'fa-cog text-white/20'}`}></i>
-                                        Format: <span className="text-white">{item.resolution || item.format_id}</span>
+                                
+                                {isCurrent ? (
+                                    <div className="mt-4">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">{speed} • {eta}</span>
+                                            <span className="text-[10px] font-black text-white">{progress}%</span>
+                                        </div>
+                                        <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                            <motion.div 
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${progress}%` }}
+                                                className="h-full bg-gradient-to-r from-red-600 to-red-400 shadow-[0_0_15px_rgba(220,38,38,0.5)]"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-white/40">
-                                        <i className="fas fa-folder"></i>
-                                        Dossier: <span className="text-white truncate max-w-[200px]">{item.folder}</span>
+                                ) : (
+                                    <div className="flex items-center gap-6">
+                                        <div className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-white/40">
+                                            <i className="fas fa-cog text-white/20"></i>
+                                            Format: <span className="text-white">{item.resolution || item.format_id}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-white/40">
+                                            <i className="fas fa-folder"></i>
+                                            Dossier: <span className="text-white truncate max-w-[200px]">{item.folder}</span>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border ${isCurrent ? 'bg-red-600 text-white border-red-400 animate-pulse' : 'bg-red-600/10 text-red-500 border-red-600/20'}`}>
