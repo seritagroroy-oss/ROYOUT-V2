@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoYout - Premium Downloader</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';">
+    <script src="tailwind.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-[#0f0f0f] text-white font-sans overflow-hidden">
+    
+    <!-- Splash Screen Overlay -->
+    <div id="splash-screen" class="fixed inset-0 z-[500] bg-[#0f0f0f] flex flex-col items-center justify-center transition-all duration-1000">
+        <div class="relative mb-12">
+            <!-- Glow background -->
+            <div class="absolute -inset-16 bg-red-600/20 blur-[80px] rounded-full animate-pulse"></div>
+            
+            <div class="relative w-32 h-32 bg-white rounded-full flex items-center justify-center border-4 border-white/10 shadow-[0_0_50px_rgba(220,38,38,0.3)] animate-bounce-slow overflow-hidden">
+                <img src="logo.png" alt="R" class="w-20 h-20 rounded-full">
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center gap-4">
+            <h2 class="text-4xl font-black tracking-tighter text-white flex items-center gap-1">
+                <span>Ro</span><span class="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">Yout</span>
+            </h2>
+            <div class="w-48 h-1 bg-white/5 rounded-full overflow-hidden relative">
+                <div class="absolute inset-0 bg-red-600 w-1/2 rounded-full animate-shimmer-progress"></div>
+            </div>
+            <p class="text-[8px] text-gray-500 uppercase tracking-[0.5em] font-black mt-2 opacity-50">Chargement de l'expérience</p>
+        </div>
+    </div>
+    
+    <!-- Root Container: Full Screen Flex -->
+    <div class="h-screen flex flex-col">
+        
+        <!-- Custom Title Bar -->
+        <div class="h-12 flex items-center px-4 z-[300] drag-area bg-white/[0.02] border-b border-white/5">
+            <!-- Gauche: Menu & Branding -->
+            <div class="flex items-center gap-3 no-drag">
+                <!-- Bouton Menu (Déplacé ici) -->
+                <button onclick="royoutToggleMenu(event)" class="no-drag w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 hover:text-red-500 hover:bg-red-600/10 transition-all border border-white/5 hover:border-red-500/30 group">
+                    <i class="fas fa-bars text-xs group-hover:scale-110 transition-transform"></i>
+                </button>
+
+                <!-- Contrôles de taille de police -->
+                <div class="flex items-center gap-1 bg-white/[0.03] p-0.5 rounded-lg border border-white/5 ml-1">
+                    <button onclick="changeFontSize(-1)" class="no-drag w-7 h-7 rounded-md hover:bg-white/5 text-white/30 hover:text-white transition-all flex items-center justify-center" title="Réduire la taille">
+                        <i class="fas fa-minus text-[9px]"></i>
+                    </button>
+                    <button onclick="resetFontSize()" class="no-drag w-7 h-7 rounded-md hover:bg-white/5 text-white/30 hover:text-white transition-all flex items-center justify-center" title="Taille par défaut (100%)">
+                        <i class="fas fa-undo text-[9px]"></i>
+                    </button>
+                    <button onclick="changeFontSize(1)" class="no-drag w-7 h-7 rounded-md hover:bg-white/5 text-white/30 hover:text-white transition-all flex items-center justify-center" title="Agrandir la taille">
+                        <i class="fas fa-plus text-[9px]"></i>
+                    </button>
+                </div>
+
+                <div class="relative">
+                    <div class="absolute -inset-1 rounded-full logo-spin-border scale-110"></div>
+                    <div class="relative w-6 h-6 bg-white rounded-full flex items-center justify-center border border-gray-900 shadow-lg">
+                        <img src="logo.png" alt="R" class="w-4 h-4 rounded-full">
+                    </div>
+                </div>
+                <h1 class="text-sm font-black tracking-tighter flex items-center gap-0.5">
+                    <span class="text-white">Ro</span><span class="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">Yout</span>
+                </h1>
+            </div>
+            
+            <!-- Centre: Outils (Historique, File) -->
+            <div class="flex-1 flex justify-center gap-6 no-drag">
+                <button id="history-btn" onclick="toggleHistory()" class="flex items-center gap-2 text-[0.68rem] font-black uppercase tracking-widest text-white/40 hover:text-red-500 transition-all group">
+                    <i class="fas fa-history text-[0.75rem]"></i>
+                    Historique
+                </button>
+
+                <button id="favorites-btn" onclick="toggleFavorites()" class="flex items-center gap-2 text-[0.68rem] font-black uppercase tracking-widest text-white/40 hover:text-red-500 transition-all group">
+                    <i class="fas fa-heart text-[0.75rem]"></i>
+                    Favoris
+                </button>
+
+                <div id="main-queue-status" class="flex items-center gap-3 text-[0.68rem] font-black uppercase tracking-widest text-white/20 hover:text-red-500 transition-all cursor-pointer" onclick="showQueue()">
+                    <div id="main-queue-icon-bg" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/5 transition-all">
+                        <i class="fas fa-list-ol text-[0.75rem]"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span id="queue-text" class="text-[0.6rem] opacity-50">File d'attente</span>
+                        <div class="flex items-center gap-2">
+                            <span id="main-queue-count" class="text-xs font-black">0</span>
+                            <div id="queue-pulse" class="hidden w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Centre: Vide (Sert de ressort) -->
+            <div class="flex-1"></div>
+
+            <!-- Droite: Signature & Boutons -->
+            <div class="flex items-center gap-6 no-drag pr-2">
+                <span id="title-bar-text" class="text-[0.68rem] font-black uppercase tracking-[0.3em] animate-shimmer-text animate-glow-text transition-all opacity-80">ROY INDUSTRIE</span>
+                
+                <div id="immersion-controls" class="hidden flex items-center h-full">
+                    <button onclick="window.pywebview.api.minimize_window()" class="w-10 h-10 flex items-center justify-center text-white/40 hover:bg-white/5 hover:text-white transition-all">
+                        <i class="fas fa-minus text-[10px]"></i>
+                    </button>
+                    <button onclick="window.pywebview.api.toggle_maximize()" class="w-10 h-10 flex items-center justify-center text-white/40 hover:bg-white/5 hover:text-white transition-all">
+                        <i class="far fa-square text-[10px]"></i>
+                    </button>
+                    <button onclick="window.pywebview.api.close_window()" class="w-10 h-10 flex items-center justify-center text-white/40 hover:bg-red-600 hover:text-white transition-all">
+                        <i class="fas fa-times text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Wrapper (Fills remaining height) -->
+        <div class="flex-1 flex flex-col px-8 pt-0 overflow-hidden">
+
+
+            <main id="main-content" class="flex-1 overflow-y-auto custom-scrollbar">
+                <div class="flex flex-col items-center pt-8 pb-40">
+                    <div id="url-input-area" class="w-full max-w-5xl flex gap-3 p-2 bg-white/[0.03] border border-white/5 rounded-[30px] backdrop-blur-xl group focus-within:border-red-500/30 transition-all duration-500">
+                        <div class="flex-1 relative flex items-center">
+                            <i class="fas fa-link absolute left-6 text-gray-600 group-focus-within:text-red-500 transition-colors"></i>
+                            <input id="url" type="text" placeholder="Faites une recherche ou saisissez un lien YouTube ici..." 
+                                   ondrop="handleDrop(event)" ondragover="event.preventDefault()"
+                                   onkeyup="if(event.key === 'Enter') analyzeVideo()"
+                                   oninput="onSearchInput()"
+                                   class="w-full bg-transparent p-5 pl-14 rounded-2xl outline-none text-lg placeholder:text-gray-700 font-medium tracking-tight">
+                        </div>
+                        <button id="analyze-btn" onclick="analyzeVideo()" 
+                                class="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 px-10 py-4 rounded-[22px] font-black text-sm uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg shadow-red-900/40 flex items-center gap-3">
+                            <span>Analyser</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                            <i id="analyze-loader" class="fas fa-circle-notch fa-spin hidden"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Discovery Section (New) -->
+                    <div id="discovery-section" class="w-full max-w-6xl mt-16 px-4">
+                        <div class="flex items-center justify-between mb-8">
+                            <h2 class="text-xl font-black uppercase tracking-[0.3em] text-white/40 flex items-center gap-4">
+                                <i class="fas fa-fire text-red-600 text-lg"></i>
+                                <span id="discovery-title">Découvrir</span>
+                            </h2>
+                            <div class="flex gap-2">
+                                <button onclick="searchVideos('Musique', 1, false, 'mixed')" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest transition-all">Tout</button>
+                                <button onclick="searchVideos(currentSearchQuery || 'Musique', 1, false, 'playlist')" class="px-4 py-2 rounded-xl bg-orange-600/20 hover:bg-orange-600/40 text-orange-500 text-[10px] font-bold uppercase tracking-widest transition-all border border-orange-500/20">
+                                    <i class="fas fa-list-ul mr-2"></i>Playlists
+                                </button>
+                                <button onclick="searchVideos('Gaming', 1, false, 'video')" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest transition-all">Gaming</button>
+                                <button onclick="searchVideos('Divertissement', 1, false, 'video')" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest transition-all">Funny</button>
+                            </div>
+                        </div>
+                        
+                        <div id="discovery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <!-- Les cartes vidéo seront injectées ici -->
+                            <div class="col-span-full py-12 flex flex-col items-center opacity-20">
+                                <i class="fas fa-spinner fa-spin text-3xl mb-4"></i>
+                                <p class="text-xs font-black uppercase tracking-widest">Chargement des recommandations...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modern Error Display -->
+                    <div id="error-display" class="hidden animate-fade-in w-full max-w-lg mt-12 relative p-[2px] overflow-hidden rounded-[32px] mx-auto">
+                        <div class="absolute inset-0 bg-gradient-to-br from-red-500/20 to-transparent"></div>
+                        <div class="relative bg-[#0f0f0f]/90 backdrop-blur-2xl rounded-[30px] p-8 border border-red-500/10 text-center shadow-2xl">
+                            <div class="w-16 h-16 bg-red-600/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-500/20">
+                                <i class="fas fa-exclamation-circle text-2xl text-red-500 animate-pulse"></i>
+                            </div>
+                            <h3 class="text-white font-black uppercase tracking-widest text-sm mb-3">Erreur d'Analyse</h3>
+                            <p id="error-message-text" class="text-gray-400 text-xs font-medium leading-relaxed mb-8 px-4"></p>
+                            <button onclick="hideError()" class="w-full bg-red-600/10 hover:bg-red-600/20 text-red-500 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all border border-red-500/20">
+                                J'ai compris
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loader -->
+                    <div id="analyze-loader" class="hidden mt-8 flex items-center gap-3 animate-pulse">
+                        <span class="text-red-500 font-bold text-xs uppercase tracking-[0.4em]">Analyse en cours...</span>
+                    </div>
+             </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast Container (Top Right) -->
+    <div id="toast-container" class="fixed top-24 right-10 z-[1000] flex flex-col gap-4 pointer-events-none"></div>
+
+    <!-- Full-Screen Overlays (Download Progress) -->
+    <div id="progress-container" class="hidden fixed inset-0 bg-[#0f0f0f] z-[10000] flex flex-col items-center justify-start pt-12 p-10 transition-all duration-500 scale-100">
+        <!-- Close Button to return to main interface -->
+        <button onclick="closeOverlay()" class="absolute top-10 right-10 w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all z-[110]">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="w-full max-w-4xl animate-fade-in flex flex-col items-center">
+                    <!-- Miniature de la vidéo en cours -->
+                    <div class="relative mb-8 w-64 h-36 rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black/40">
+                        <img id="progress-thumb" src="logo.png" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0f0f0f] via-transparent to-transparent"></div>
+                    </div>
+
+                    <span id="percent-text" class="text-[8rem] font-black text-red-600 leading-none tracking-tighter">0%</span>
+                    
+                    <div class="w-full mt-4">
+                        <p id="video-title" class="text-lg text-gray-400 truncate mb-6 text-center font-bold">Initialisation...</p>
+                        
+                        <!-- Queue Status -->
+                        <div id="queue-status" class="hidden text-center text-[10px] uppercase tracking-widest text-red-500 font-black mb-4">
+                            <i class="fas fa-list-ol mr-2"></i> <span id="queue-count">0</span> téléchargement(s) en attente
+                            <button onclick="showQueue()" class="ml-4 text-white/40 hover:text-white underline decoration-red-500/50 underline-offset-4 transition-all">Voir la liste</button>
+                        </div>
+
+                        <div class="h-3 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 mb-8 shadow-inner">
+                            <div id="progress-bar" class="h-full bg-gradient-to-r from-red-600 to-orange-500 w-0 transition-all duration-300"></div>
+                        </div>
+
+                        <div class="flex justify-center gap-16">
+                            <div class="text-center">
+                                <p id="speed-val" class="text-4xl font-black text-white">0 MB/s</p>
+                                <p class="text-[10px] text-gray-600 uppercase font-black tracking-[0.3em] mt-2">Vitesse</p>
+                            </div>
+                            <div class="text-center">
+                                <p id="eta-val" class="text-4xl font-black text-white">--:--</p>
+                                <p class="text-[10px] text-gray-600 uppercase font-black tracking-[0.3em] mt-2">Temps restant</p>
+                            </div>
+                        </div>
+                        
+                        <p id="status-message" class="text-center text-[10px] mt-6 uppercase tracking-[0.5em] font-black text-red-500 animate-pulse">Téléchargement en cours...</p>
+
+                        <!-- Boutons de succès (cachés par défaut) -->
+                        <div id="success-actions" class="hidden flex justify-center gap-6 mt-8 animate-fade-in">
+                            <button onclick="openFolder()" class="bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3">
+                                <i class="fas fa-folder-open text-orange-500"></i> Dossier
+                            </button>
+                            <button onclick="shareApp()" class="bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-400 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3">
+                                <i class="fas fa-share-alt"></i> Partager
+                            </button>
+                            <button onclick="closeOverlay()" class="bg-red-600 hover:bg-red-500 px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-red-900/40">
+                                Terminer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Historique Modal -->
+    <div id="history-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-3xl" onclick="toggleHistory()"></div>
+        
+        <div class="relative bg-[#0f0f0f] w-full h-full overflow-hidden flex flex-col shadow-2xl animate-fade-in">
+            <!-- Header Modal -->
+            <div class="pt-16 pb-10 px-10 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <div>
+                    <h2 class="text-4xl font-black tracking-tighter text-white">HISTORIQUE</h2>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-black mt-2">Tes 500 derniers téléchargements</p>
+                </div>
+                <button onclick="toggleHistory()" class="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Liste Historique -->
+            <div id="history-list" class="flex-1 overflow-y-auto p-10 custom-scrollbar space-y-6">
+                <!-- Les items seront injectés ici -->
+                <div class="flex flex-col items-center justify-center h-full opacity-20">
+                    <i class="fas fa-history text-8xl mb-6"></i>
+                    <p class="text-xl font-bold uppercase tracking-widest">Aucun historique</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Favorites Modal -->
+    <div id="favorites-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-3xl" onclick="toggleFavorites()"></div>
+        <div class="relative bg-[#0f0f0f] w-full h-full overflow-hidden flex flex-col shadow-2xl animate-fade-in">
+            <div class="pt-16 pb-10 px-10 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <div>
+                    <h2 class="text-4xl font-black tracking-tighter text-white uppercase">FAVORIS</h2>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-black mt-2">Tes vidéos préférées sauvegardées</p>
+                </div>
+                <button onclick="toggleFavorites()" class="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="favorites-list" class="flex-1 overflow-y-auto p-10 custom-scrollbar space-y-6">
+                <div class="flex flex-col items-center justify-center h-full opacity-20">
+                    <i class="fas fa-heart text-8xl mb-6"></i>
+                    <p class="text-xl font-bold uppercase tracking-widest">Aucun favori</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fenêtre À Propos (Modal) -->
+    <div id="about-modal" class="hidden fixed inset-0 z-[1000] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-3xl" onclick="closeAbout()"></div>
+        
+        <div class="relative bg-[#0f0f0f] w-full h-full overflow-hidden flex flex-col shadow-2xl animate-fade-in">
+            <!-- Header Modal -->
+            <div class="pt-16 pb-10 px-10 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <div>
+                    <h2 class="text-4xl font-black tracking-tighter text-white uppercase">À PROPOS</h2>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-black mt-2">Découvrez l'histoire et la technologie derrière RoYout</p>
+                </div>
+                <button onclick="closeAbout()" class="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Contenu Modal -->
+            <div class="p-10 overflow-y-auto custom-scrollbar space-y-8 text-gray-300 leading-relaxed">
+                <section class="max-w-5xl mx-auto">
+                    <h3 class="text-white font-black uppercase tracking-wider text-sm mb-4">La Genèse du Projet</h3>
+                    <p class="text-base">RoYout est né d'un constat simple : récupérer ses propres contenus ou des vidéos libres de droits devrait être une procédure rapide, fluide et sans fioritures. Conçu et développé par <span class="text-red-500 font-bold">SERI TAGRO ROY</span>, cet outil est le fruit d'un travail passionné visant à offrir une alternative légère, performante et surtout accessible à tous.</p>
+                </section>
+
+                <section class="max-w-5xl mx-auto">
+                    <h3 class="text-white font-black uppercase tracking-wider text-sm mb-4">Performance & Polyvalence Technique</h3>
+                    <ul class="space-y-4 text-base">
+                        <li class="flex gap-4"><i class="fas fa-check text-red-600 mt-1"></i> <div><b class="text-white">Haute Résolution :</b> Support complet de la 4K, 1080p (Full HD) et 720p.</div></li>
+                        <li class="flex gap-4"><i class="fas fa-check text-red-600 mt-1"></i> <div><b class="text-white">Formats Vidéo :</b> Exportation native en MP4 et WebM.</div></li>
+                        <li class="flex gap-4"><i class="fas fa-check text-red-600 mt-1"></i> <div><b class="text-white">Extraction Audio :</b> Conversion ultra-rapide en MP3 (jusqu'à 320 kbps).</div></li>
+                        <li class="flex gap-4"><i class="fas fa-check text-red-600 mt-1"></i> <div><b class="text-white">Gestion Intelligente :</b> Fusion automatique des flux audio et vidéo.</div></li>
+                    </ul>
+                </section>
+
+                <section class="max-w-5xl mx-auto">
+                    <h3 class="text-white font-black uppercase tracking-wider text-sm mb-4">100% Gratuit, Sans Compromis</h3>
+                    <div class="bg-white/5 rounded-2xl p-6 border border-white/5 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                        <div class="text-xs font-bold uppercase"><i class="fas fa-unlock text-red-500 mb-3 block text-xl"></i> Pas d'abonnement</div>
+                        <div class="text-xs font-bold uppercase"><i class="fas fa-ban text-red-500 mb-3 block text-xl"></i> Pas de pub</div>
+                        <div class="text-xs font-bold uppercase"><i class="fas fa-infinity text-red-500 mb-3 block text-xl"></i> Accès illimité</div>
+                    </div>
+                </section>
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Fenêtre FAQ (Modal) -->
+    <div id="faq-modal" class="hidden fixed inset-0 z-[1000] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-3xl" onclick="closeFAQ()"></div>
+        
+        <div class="relative bg-[#0f0f0f] w-full h-full overflow-hidden flex flex-col shadow-2xl animate-fade-in">
+            <div class="pt-16 pb-10 px-10 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <div>
+                    <h2 class="text-4xl font-black tracking-tighter text-white uppercase">FAQ</h2>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-black mt-2">Questions fréquentes et assistance</p>
+                </div>
+                <button onclick="closeFAQ()" class="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-10 overflow-y-auto custom-scrollbar space-y-4">
+                <div class="max-w-5xl mx-auto space-y-4 pb-20">
+                    <details class="group bg-white/5 rounded-2xl border border-white/5 overflow-hidden transition-all hover:bg-white/[0.08]">
+                        <summary class="list-none p-6 cursor-pointer flex justify-between items-center font-bold text-base">
+                            Est-ce que RoYout est vraiment gratuit ?
+                            <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="p-8 pt-0 text-base text-gray-400 border-t border-white/5 bg-black/20 leading-relaxed">
+                            Oui, RoYout est 100% gratuit. Il n'y a aucun frais d'inscription, ni de fonctionnalités premium cachées. L'outil a été développé par SERI TAGRO ROY dans un esprit de partage et de performance.
+                        </div>
+                    </details>
+
+                    <details class="group bg-white/5 rounded-2xl border border-white/5 overflow-hidden transition-all hover:bg-white/[0.08]">
+                        <summary class="list-none p-6 cursor-pointer flex justify-between items-center font-bold text-base">
+                            Quels formats de fichiers sont supportés ?
+                            <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="p-8 pt-0 text-base text-gray-400 border-t border-white/5 bg-black/20 leading-relaxed">
+                            Vous pouvez télécharger vos vidéos en format MP4 ou WebM. Pour l'audio uniquement, l'application propose une conversion directe en MP3 de haute qualité (320 kbps).
+                        </div>
+                    </details>
+
+                    <details class="group bg-white/5 rounded-2xl border border-white/5 overflow-hidden transition-all hover:bg-white/[0.08]">
+                        <summary class="list-none p-6 cursor-pointer flex justify-between items-center font-bold text-base">
+                            Puis-je télécharger des vidéos en 4K ?
+                            <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="p-8 pt-0 text-base text-gray-400 border-t border-white/5 bg-black/20 leading-relaxed">
+                            Absolument. Si la vidéo d'origine est disponible en 4K ou en 1080p, RoYout vous permettra de sélectionner ces résolutions. L'application se charge de fusionner automatiquement la vidéo et l'audio pour vous offrir le meilleur rendu possible.
+                        </div>
+                    </details>
+
+                    <details class="group bg-white/5 rounded-2xl border border-white/5 overflow-hidden transition-all hover:bg-white/[0.08]">
+                        <summary class="list-none p-6 cursor-pointer flex justify-between items-center font-bold text-base">
+                            Pourquoi mon antivirus bloque-t-il l'installation ?
+                            <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="p-8 pt-0 text-base text-gray-400 border-t border-white/5 bg-black/20 leading-relaxed">
+                            Comme RoYout est indépendant, il n'est pas encore "signé". Windows SmartScreen peut afficher une alerte. Cliquez sur "Informations complémentaires" puis "Exécuter quand même". L'application est 100% sûre.
+                        </div>
+                    </details>
+
+                    <details class="group bg-white/5 rounded-2xl border border-white/5 overflow-hidden transition-all hover:bg-white/[0.08]">
+                        <summary class="list-none p-6 cursor-pointer flex justify-between items-center font-bold text-base">
+                            Est-ce légal d'utiliser RoYout ?
+                            <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="p-8 pt-0 text-base text-gray-400 border-t border-white/5 bg-black/20 leading-relaxed">
+                            RoYout est un outil technique destiné à un usage personnel et privé. Nous encourageons nos utilisateurs à respecter les droits d'auteur et les conditions d'utilisation des plateformes.
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fenêtre de Confirmation (Custom Confirm) -->
+    <div id="confirm-modal" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+        <div class="glass-container max-w-sm w-full p-8 border border-white/10 shadow-2xl text-center transform scale-95 transition-transform duration-300">
+            <div class="w-16 h-16 rounded-2xl bg-red-600/20 flex items-center justify-center mx-auto mb-6 border border-red-600/30">
+                <i class="fas fa-exclamation-triangle text-2xl text-red-500 animate-pulse"></i>
+            </div>
+            <h3 class="text-white font-black uppercase tracking-widest text-sm mb-3">Confirmation</h3>
+            <p class="text-gray-400 text-sm mb-8 leading-relaxed">Voulez-vous vraiment effacer tout votre historique ? Cette action est irréversible.</p>
+            
+            <div class="flex flex-col gap-3">
+                <button onclick="executeClearHistory()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:scale-105 shadow-lg shadow-red-600/20">
+                    Effacer tout
+                </button>
+                <button onclick="closeConfirm()" class="w-full bg-white/5 hover:bg-white/10 text-white/60 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all border border-white/5">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fenêtre Soutien (Modal) -->
+    <div id="support-modal" class="hidden fixed inset-0 z-[1000] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-3xl" onclick="closeSupport()"></div>
+        
+        <div class="relative bg-[#0f0f0f] w-full h-full overflow-hidden flex flex-col shadow-2xl animate-fade-in text-left">
+            <div class="pt-16 pb-10 px-10 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <div>
+                    <h2 class="text-4xl font-black tracking-tighter text-white uppercase">SOUTIEN</h2>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-black mt-2">Soutenir le projet et le développeur</p>
+                </div>
+                <button onclick="closeSupport()" class="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-10 overflow-y-auto custom-scrollbar space-y-8 text-gray-300">
+                <div class="max-w-5xl mx-auto space-y-8 pb-20">
+                    <div class="space-y-6 text-base leading-relaxed">
+                        <div>
+                            <h3 class="text-white font-bold mb-3 text-lg">Pourquoi soutenir RoYout ?</h3>
+                            <p class="mb-4">
+                                <span class="text-white font-bold">RoYout</span> est un projet indépendant développé, maintenu et mis à jour bénévolement par <span class="text-red-500 font-bold">SERI TAGRO ROY</span>. L'application restera toujours <span class="text-white font-bold">100% gratuite</span> et sans publicité. 
+                            </p>
+                            <p class="mb-4 text-white/60 italic">Si l'outil vous est utile et que vous souhaitez m'aider à le rendre encore plus performant, votre soutien financier permet de :</p>
+                            <ul class="space-y-3">
+                                <li class="flex gap-4">🚀 <span><b class="text-white">Améliorer les serveurs</b> pour des téléchargements encore plus rapides.</span></li>
+                                <li class="flex gap-4">🛠️ <span><b class="text-white">Maintenir le code</b> face aux mises à jour constantes des plateformes vidéo.</span></li>
+                                <li class="flex gap-4">💻 <span><b class="text-white">Investir dans de nouvelles fonctionnalités</b> (comme une version mobile ou Mac).</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="border-t border-white/5 pt-8">
+                            <h3 class="text-white font-bold mb-4 text-lg">Moyens de paiement internationaux</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                                <button onclick="window.pywebview.api.open_external_link('https://www.buymeacoffee.com/votre-compte')" class="flex items-center justify-center gap-4 bg-[#FFDD00] hover:bg-[#ffea00] text-black px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:scale-105 shadow-lg shadow-yellow-600/10">
+                                    <i class="fas fa-coffee text-xl"></i>
+                                    Buy Me a Coffee
+                                </button>
+                                <button onclick="window.pywebview.api.open_external_link('https://www.paypal.me/votre-compte')" class="flex items-center justify-center gap-4 bg-[#0070ba] hover:bg-[#0080d6] text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:scale-105 shadow-lg shadow-blue-600/10">
+                                    <i class="fab fa-paypal text-xl"></i>
+                                    PayPal.me
+                                </button>
+                            </div>
+
+                            <h3 class="text-white font-bold mb-4 text-lg">Moyens de paiement locaux (Côte d'Ivoire)</h3>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+                                <!-- Orange Money -->
+                                <div class="bg-[#FF6600]/10 border border-[#FF6600]/20 p-4 rounded-2xl text-center group hover:bg-[#FF6600]/20 transition-all cursor-pointer">
+                                    <div class="text-[#FF6600] font-black text-[10px] uppercase mb-1">Orange Money</div>
+                                    <div class="text-white font-bold text-xs">07 67 17 45 41</div>
+                                </div>
+                                <!-- MTN Money -->
+                                <div class="bg-[#FFCC00]/10 border border-[#FFCC00]/20 p-4 rounded-2xl text-center group hover:bg-[#FFCC00]/20 transition-all cursor-pointer">
+                                    <div class="text-[#FFCC00] font-black text-[10px] uppercase mb-1">MTN MoMo</div>
+                                    <div class="text-white font-bold text-xs">05 54 37 75 07</div>
+                                </div>
+                                <!-- Moov Money -->
+                                <div class="bg-[#009639]/10 border border-[#009639]/20 p-4 rounded-2xl text-center group hover:bg-[#009639]/20 transition-all cursor-pointer">
+                                    <div class="text-[#009639] font-black text-[10px] uppercase mb-1">Moov Money</div>
+                                    <div class="text-white font-bold text-xs">01 40 94 59 41</div>
+                                </div>
+                                <!-- Wave -->
+                                <div class="bg-[#1DA1F2]/10 border border-[#1DA1F2]/20 p-4 rounded-2xl text-center group hover:bg-[#1DA1F2]/20 transition-all cursor-pointer">
+                                    <div class="text-[#1DA1F2] font-black text-[10px] uppercase mb-1">Wave</div>
+                                    <div class="text-white font-bold text-xs">07 67 17 45 41</div>
+                                </div>
+                                <!-- Carte VISA -->
+                                <div class="bg-white/5 border border-white/10 p-4 rounded-2xl text-center group hover:bg-white/10 transition-all cursor-pointer flex flex-col justify-center">
+                                    <div class="text-white font-black text-[10px] uppercase mb-1">Carte VISA / Master</div>
+                                    <i class="fab fa-cc-visa text-lg text-white/40 group-hover:text-white transition-colors"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <blockquote class="bg-white/5 border-l-4 border-red-600 p-8 rounded-r-2xl italic text-base text-white/60 mt-8">
+                            "Votre soutien, qu'il soit financier ou simplement un message d'encouragement, est le moteur de ce projet. Merci d'avance à tous ceux qui contribuent à faire grandir <span class="text-white font-bold">RoYout</span> !"
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Queue Modal -->
+    <div id="queue-modal" class="hidden fixed inset-0 z-[600] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-3xl" onclick="closeQueue()"></div>
+        
+        <div class="relative bg-[#0f0f0f] w-full h-full overflow-hidden flex flex-col shadow-2xl animate-fade-in">
+            <div class="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <div>
+                    <h2 class="text-3xl font-black tracking-tighter text-white">FILE D'ATTENTE</h2>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-black mt-2">Vidéos qui seront téléchargées ensuite</p>
+                </div>
+                <button onclick="closeQueue()" class="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="queue-list-content" class="flex-1 overflow-y-auto p-10 custom-scrollbar space-y-4">
+                <!-- Items will be injected here -->
+                <div class="text-center py-10 opacity-30">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                    <p class="text-[10px] uppercase font-black tracking-widest">Chargement de la file...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div id="schedule-modal" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+        <div class="glass-container max-w-md w-full p-8 border border-white/10 shadow-2xl text-center">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-600/20 flex items-center justify-center mx-auto mb-6 border border-indigo-600/30">
+                <i class="fas fa-clock text-2xl text-indigo-500"></i>
+            </div>
+            <h3 class="text-white font-black uppercase tracking-widest text-sm mb-2">Planifier le téléchargement</h3>
+            <p class="text-gray-400 text-xs mb-8">Choisissez dans combien de temps lancer le téléchargement.</p>
+            
+            <div class="grid grid-cols-2 gap-3 mb-8">
+                <button onclick="confirmSchedule(900)" class="bg-white/5 hover:bg-indigo-600/20 border border-white/5 hover:border-indigo-500/30 p-4 rounded-2xl transition-all group">
+                    <div class="text-white font-black text-lg group-hover:text-indigo-400">15m</div>
+                    <div class="text-[8px] text-gray-500 uppercase font-black">Minutes</div>
+                </button>
+                <button onclick="confirmSchedule(3600)" class="bg-white/5 hover:bg-indigo-600/20 border border-white/5 hover:border-indigo-500/30 p-4 rounded-2xl transition-all group">
+                    <div class="text-white font-black text-lg group-hover:text-indigo-400">1h</div>
+                    <div class="text-[8px] text-gray-500 uppercase font-black">Heure</div>
+                </button>
+                <button onclick="confirmSchedule(7200)" class="bg-white/5 hover:bg-indigo-600/20 border border-white/5 hover:border-indigo-500/30 p-4 rounded-2xl transition-all group">
+                    <div class="text-white font-black text-lg group-hover:text-indigo-400">2h</div>
+                    <div class="text-[8px] text-gray-500 uppercase font-black">Heures</div>
+                </button>
+                <button onclick="confirmSchedule(18000)" class="bg-white/5 hover:bg-indigo-600/20 border border-white/5 hover:border-indigo-500/30 p-4 rounded-2xl transition-all group">
+                    <div class="text-white font-black text-lg group-hover:text-indigo-400">5h</div>
+                    <div class="text-[8px] text-gray-500 uppercase font-black">Heures</div>
+                </button>
+            </div>
+            
+            <button onclick="closeScheduler()" class="w-full bg-white/5 hover:bg-white/10 text-white/40 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border border-white/5">
+                Annuler
+            </button>
+        </div>
+    </div>
+
+    <!-- Menu Principal Fixe -->
+    <div id="royout-dropdown" class="hidden fixed top-14 left-4 w-64 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl z-[9999] overflow-hidden backdrop-blur-xl">
+        <div class="p-4 border-b border-white/5">
+            <span class="text-[10px] font-black uppercase tracking-widest text-white/30">Paramètres</span>
+        </div>
+        <div class="overflow-y-auto max-h-[400px] custom-scrollbar p-2 space-y-1">
+            <!-- Section: Téléchargement -->
+            <div class="px-3 py-2 text-[0.6rem] font-black uppercase tracking-[0.2em] text-white/20">Téléchargement</div>
+            <button onclick="selectFolder()" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all group">
+                <i class="fas fa-folder-open text-xs text-yellow-500/50 group-hover:text-yellow-500"></i>
+                <span class="text-xs font-bold">Dossier de sortie</span>
+            </button>
+            <button onclick="clearHistory()" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all group">
+                <i class="fas fa-trash-alt text-xs text-red-500/50 group-hover:text-red-500"></i>
+                <span class="text-xs font-bold">Effacer l'historique</span>
+            </button>
+
+            <!-- Section: Application -->
+            <div class="px-3 py-2 mt-2 text-[0.6rem] font-black uppercase tracking-[0.2em] text-white/20">Application</div>
+            <button onclick="toggleFullscreen()" class="w-full flex justify-between items-center p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all group">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-expand-arrows-alt text-xs text-blue-500/50 group-hover:text-blue-500"></i>
+                    <span class="text-xs font-bold">Mode Immersion</span>
+                </div>
+                <div id="fullscreen-status" class="text-[0.55rem] font-black uppercase tracking-widest px-2 py-1 rounded-md bg-white/5 text-white/20 group-hover:text-white/40">OFF</div>
+            </button>
+            <button onclick="installWindowsIntegration()" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all group">
+                <i class="fas fa-desktop text-xs text-indigo-500/50 group-hover:text-indigo-500"></i>
+                <span class="text-xs font-bold">Intégration Windows (Clic droit)</span>
+            </button>
+            <button onclick="checkUpdates()" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all group">
+                <i class="fas fa-sync text-xs text-emerald-500/50 group-hover:text-emerald-500"></i>
+                <span class="text-xs font-bold">Mises à jour</span>
+            </button>
+            
+            <!-- Section: Thème -->
+            <div class="px-3 py-2 mt-2 text-[9px] font-black uppercase tracking-[0.2em] text-white/20">Nuances de Thème</div>
+            <div class="px-3 py-3 bg-black/20 rounded-2xl mx-2 mb-2 flex flex-col gap-3">
+                <div class="grid grid-cols-5 gap-3 px-1">
+                    <button onclick="setAppTheme('black')" class="w-7 h-7 rounded-full bg-black border border-white/10 hover:scale-110 transition-all shadow-lg" title="Noir Pur"></button>
+                    <button onclick="setAppTheme('onyx')" class="w-7 h-7 rounded-full bg-[#0a0a0a] border border-white/10 hover:scale-110 transition-all shadow-lg" title="Onyx"></button>
+                    <button onclick="setAppTheme('dark')" class="w-7 h-7 rounded-full bg-[#0f0f0f] border border-white/10 hover:scale-110 transition-all shadow-lg" title="Sombre Premium"></button>
+                    <button onclick="setAppTheme('charcoal')" class="w-7 h-7 rounded-full bg-[#161616] border border-white/10 hover:scale-110 transition-all shadow-lg" title="Charbon"></button>
+                    <button onclick="setAppTheme('anthracite')" class="w-7 h-7 rounded-full bg-[#1a1a1a] border border-white/10 hover:scale-110 transition-all shadow-lg" title="Anthracite"></button>
+                    
+                    <button onclick="setAppTheme('slate')" class="w-7 h-7 rounded-full bg-[#262626] border border-white/10 hover:scale-110 transition-all shadow-lg" title="Ardoise"></button>
+                    <button onclick="setAppTheme('night')" class="w-7 h-7 rounded-full bg-[#333333] border border-white/10 hover:scale-110 transition-all shadow-lg" title="Gris Nuit"></button>
+                    <button onclick="setAppTheme('metal')" class="w-7 h-7 rounded-full bg-[#4d4d4d] border border-white/10 hover:scale-110 transition-all shadow-lg" title="Gris Métal"></button>
+                    <button onclick="setAppTheme('soft')" class="w-7 h-7 rounded-full bg-[#f0f0f0] border border-white/10 hover:scale-110 transition-all shadow-lg" title="Gris Doux"></button>
+                    <button onclick="setAppTheme('light')" class="w-7 h-7 rounded-full bg-white border border-white/10 hover:scale-110 transition-all shadow-lg" title="Blanc Pur"></button>
+                </div>
+                <div class="flex justify-between items-center px-2">
+                    <span class="text-[0.5rem] font-bold text-white/30 uppercase tracking-widest">Sélecteur de Nuance</span>
+                    <div id="theme-indicator" class="text-[0.5rem] font-black uppercase tracking-widest text-red-500">Sombre</div>
+                </div>
+            </div>
+            <button onclick="viewLogs()" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all group">
+                <i class="fas fa-file-alt text-xs text-orange-500/50 group-hover:text-orange-500"></i>
+                <span class="text-xs font-bold">Afficher les Logs (Debug)</span>
+            </button>
+            <button onclick="showFAQ()" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all group">
+                <i class="fas fa-question-circle text-xs text-purple-500/50 group-hover:text-purple-500"></i>
+                <span class="text-xs font-bold">Foire Aux Questions (FAQ)</span>
+            </button>
+            <button onclick="showSupport()" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all group">
+                <i class="fas fa-heart text-xs text-red-500/50 group-hover:text-red-500"></i>
+                <span class="text-xs font-bold">Soutenir le projet</span>
+            </button>
+            <button onclick="showAbout()" class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all group">
+                <i class="fas fa-info-circle text-xs text-emerald-500/50 group-hover:text-emerald-500"></i>
+                <span class="text-xs font-bold">À propos de RoYout</span>
+            </button>
+        </div>
+        
+
+    </div>
+    
+    <!-- Full-Screen Overlay System (Isolated at Root) -->
+    <div id="modal-backdrop" class="hidden fixed inset-0 z-[9999] bg-[#0f0f0f] overflow-y-auto custom-scrollbar">
+        
+        <!-- Video Preview -->
+        <div id="video-preview" class="hidden w-full min-h-screen p-6 md:p-16 bg-[#0f0f0f]">
+            <div class="max-w-7xl mx-auto">
+                <!-- Header Controls -->
+                <div class="flex justify-between items-center mb-12">
+                    <button onclick="goBack()" class="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all group shadow-xl">
+                        <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                        <span class="text-xs font-black uppercase tracking-widest">Retour aux résultats</span>
+                    </button>
+                    <div class="flex gap-4">
+                        <button onclick="openScheduler()" class="bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/30 text-indigo-500 px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all">
+                            <i class="fas fa-clock mr-2"></i> Planifier
+                        </button>
+                        <button onclick="resetApp()" class="bg-red-600/10 hover:bg-red-600/20 border border-red-500/30 text-red-500 px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all">
+                            <i class="fas fa-redo-alt mr-2"></i> Nouvelle Analyse
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Video Section (TOP CENTERED) -->
+                <div class="flex flex-col items-center text-center mb-16">
+                    <div id="thumb-container" onclick="playVideoPreview()" class="relative group cursor-pointer w-full max-w-2xl mb-10">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-red-600 to-orange-600 rounded-[35px] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                        <div id="player-wrapper" class="relative aspect-video rounded-[30px] overflow-hidden shadow-2xl border border-white/10 bg-black flex items-center justify-center">
+                            <img id="thumb" src="" class="w-full h-full object-cover">
+                            <div id="play-overlay" class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-all">
+                                <div class="w-20 h-20 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform transition-all group-hover:scale-110">
+                                    <i class="fas fa-play ml-1 text-2xl"></i>
+                                </div>
+                            </div>
+                            <!-- PiP Button (Top Right of player) -->
+                            <button id="pip-btn" onclick="togglePiP(event)" class="hidden absolute top-4 right-4 w-10 h-10 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-red-600 transition-all z-20">
+                                <i class="fas fa-external-link-alt text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <h2 id="title" class="text-4xl md:text-5xl font-black leading-tight max-w-4xl bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent"></h2>
+                    
+                    <div class="flex flex-wrap justify-center gap-4 mt-8 items-center">
+                        <span class="px-6 py-2.5 bg-red-600/10 text-red-500 rounded-full text-xs font-black tracking-widest uppercase border border-red-500/20">YouTube</span>
+                        <span id="duration" class="px-6 py-2.5 bg-white/5 text-gray-400 rounded-full text-xs font-black tracking-widest uppercase border border-white/10">--:--</span>
+                        <div id="language-selector-container" class="hidden">
+                            <select id="audio-lang-select" class="bg-white/5 border border-white/10 text-white/70 text-xs font-black uppercase rounded-2xl px-6 py-2.5 focus:outline-none focus:border-red-500/30 transition-all cursor-pointer"></select>
+                        </div>
+                        <button id="fav-btn" onclick="toggleFavorite()" class="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-red-500 hover:bg-white/10 transition-all">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+
+                    <!-- NOUVELLES OPTIONS PREMIUM (Trim & Subs) -->
+                    <div class="w-full max-w-4xl mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Découpage (Trim) -->
+                        <div class="p-6 bg-white/[0.02] border border-white/5 rounded-3xl space-y-4">
+                            <h4 class="text-[10px] font-black uppercase tracking-widest text-white/30 flex items-center gap-2">
+                                <i class="fas fa-cut text-indigo-500"></i> Découpage (Optionnel)
+                            </h4>
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1 space-y-2">
+                                    <label class="text-[8px] uppercase font-bold text-gray-500">Début (ex: 00:30)</label>
+                                    <input id="trim-start" type="text" placeholder="00:00" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-xs text-white focus:border-indigo-500/50 outline-none transition-all">
+                                </div>
+                                <div class="flex-1 space-y-2">
+                                    <label class="text-[8px] uppercase font-bold text-gray-500">Fin (ex: 02:45)</label>
+                                    <input id="trim-end" type="text" placeholder="Fin" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-xs text-white focus:border-indigo-500/50 outline-none transition-all">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Sous-titres -->
+                        <div class="p-6 bg-white/[0.02] border border-white/5 rounded-3xl space-y-4">
+                            <h4 class="text-[10px] font-black uppercase tracking-widest text-white/30 flex items-center gap-2">
+                                <i class="fas fa-closed-captioning text-emerald-500"></i> Sous-titres
+                            </h4>
+                            <div class="flex items-center justify-between p-3 bg-black/40 border border-white/10 rounded-xl">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase">Télécharger les sous-titres</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="download-subs" type="checkbox" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-emerald-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Options Section (BELOW VIDEO) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 border-t border-white/5 pt-16">
+                    <div>
+                        <h3 class="text-white font-black uppercase tracking-[0.3em] text-xs mb-8 flex items-center gap-4">
+                            <div class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div> Qualités Vidéo
+                        </h3>
+                        <div id="video-formats" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-black uppercase tracking-[0.3em] text-xs mb-8 flex items-center gap-4">
+                            <div class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div> Formats Audio
+                        </h3>
+                        <div id="audio-formats" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar"></div>
+                    </div>
+                </div>
+
+                <!-- Folder Selection (BOTTOM) -->
+                <div class="mt-16 bg-white/[0.02] border border-white/5 rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-red-500/30 transition-all duration-500">
+                    <div class="flex items-center gap-6">
+                        <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-gray-500 group-hover:text-red-500 transition-colors">
+                            <i class="fas fa-folder-open text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">Dossier d'enregistrement</p>
+                            <p id="current-folder-path" class="text-sm font-bold text-gray-300 tracking-tight">...</p>
+                        </div>
+                    </div>
+                    <button onclick="changeFolder()" class="w-full md:w-auto bg-white/5 hover:bg-white/10 px-10 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border border-white/10">
+                        Changer le dossier
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Playlist Preview -->
+        <div id="playlist-preview" class="hidden w-full min-h-screen p-6 md:p-16 bg-[#0f0f0f]">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-12">
+                    <button onclick="goBack()" class="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-white/60 hover:text-white transition-all group">
+                        <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                        <span class="text-xs font-black uppercase tracking-widest">Retour</span>
+                    </button>
+                    <div class="flex items-center gap-6">
+                        <div class="w-14 h-14 bg-orange-600/20 border border-orange-500/30 rounded-2xl flex items-center justify-center text-orange-500">
+                            <i class="fas fa-list-ul text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 id="playlist-title" class="text-3xl font-black bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent"></h2>
+                            <p class="text-xs text-orange-500 font-black uppercase tracking-widest mt-1">Playlist YouTube • <span id="playlist-count">0</span> vidéos</p>
+                        </div>
+                    </div>
+                    <button onclick="resetApp()" class="bg-white/5 border border-white/10 px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all">
+                        Annuler
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+                    <div class="lg:col-span-1 space-y-8">
+                        <div class="p-8 bg-white/[0.02] border border-white/5 rounded-[32px]">
+                            <h3 class="text-white font-black uppercase tracking-[0.2em] text-[10px] mb-6">Tout Télécharger</h3>
+                            <div id="playlist-batch-formats" class="space-y-3"></div>
+                            <button onclick="downloadPlaylistBatch()" class="w-full mt-8 py-5 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-orange-900/20 flex items-center justify-center gap-4">
+                                <i class="fas fa-cloud-download-alt text-lg"></i> Lancer
+                            </button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3">
+                        <div id="playlist-videos" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[750px] overflow-y-auto pr-6 custom-scrollbar"></div>
+                    </div>
+                </div>
+
+                <!-- Folder Selection (BOTTOM) -->
+                <div class="mt-16 bg-white/[0.02] border border-white/5 rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-red-500/30 transition-all duration-500">
+                    <div class="flex items-center gap-6">
+                        <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-gray-500 group-hover:text-red-500 transition-colors">
+                            <i class="fas fa-folder-open text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-600 font-black uppercase tracking-widest mb-1">Dossier d'enregistrement</p>
+                            <p id="playlist-folder-path" class="text-sm font-bold text-gray-300 tracking-tight">...</p>
+                        </div>
+                    </div>
+                    <button onclick="changeFolder()" class="w-full md:w-auto bg-white/5 hover:bg-white/10 px-10 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border border-white/10">
+                        Changer le dossier
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Modal (Premium Version) -->
+    <div id="update-modal" class="hidden fixed inset-0 z-[10001] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl">
+        <div class="relative w-full max-w-md transform scale-100 transition-all duration-500">
+            <!-- Glow background -->
+            <div class="absolute -inset-4 bg-blue-600/20 blur-[60px] rounded-full opacity-50"></div>
+            
+            <div class="relative bg-[#111] border border-white/10 rounded-[40px] overflow-hidden shadow-2xl">
+                <!-- Header Gradient Decor -->
+                <div class="h-32 bg-gradient-to-br from-blue-600/20 via-indigo-600/10 to-transparent relative flex items-center justify-center">
+                    <div class="w-20 h-20 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-xl">
+                        <i class="fas fa-rocket text-3xl text-blue-500 animate-bounce-slow"></i>
+                    </div>
+                    <!-- Badge -->
+                    <div class="absolute top-6 right-6 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+                        <span class="text-[8px] font-black uppercase tracking-widest text-blue-400">Mise à jour recommandée</span>
+                    </div>
+                </div>
+
+                <div class="p-10 pt-6 text-center">
+                    <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Une nouvelle ère commence</h3>
+                    <p class="text-gray-500 text-xs font-medium mb-8 leading-relaxed px-4">
+                        Nous avons optimisé RoYout pour vous offrir une expérience encore plus rapide et stable.
+                    </p>
+
+                    <!-- Version Comparison -->
+                    <div class="flex items-center justify-between bg-white/[0.03] border border-white/5 rounded-3xl p-6 mb-10">
+                        <div class="text-left">
+                            <p class="text-[8px] font-black uppercase tracking-widest text-gray-600 mb-1">Actuelle</p>
+                            <p class="text-sm font-bold text-gray-400">v1.1.0</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-long-arrow-alt-right text-blue-500/40 text-lg"></i>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[8px] font-black uppercase tracking-widest text-blue-400 mb-1">Nouvelle</p>
+                            <p id="update-version" class="text-sm font-black text-white">v1.5.0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col gap-4">
+                        <button onclick="downloadUpdate()" class="w-full group relative overflow-hidden bg-white text-black py-5 rounded-[22px] font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:scale-[1.02] active:scale-95 shadow-xl">
+                            <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <span class="relative group-hover:text-white transition-colors">Mettre à jour maintenant</span>
+                        </button>
+                        
+                        <button onclick="ignoreUpdate()" class="w-full py-4 text-[9px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-all">
+                            Me le rappeler dans 7 jours
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Footer decor -->
+                <div class="h-1 bg-gradient-to-r from-transparent via-blue-600/50 to-transparent opacity-30"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
