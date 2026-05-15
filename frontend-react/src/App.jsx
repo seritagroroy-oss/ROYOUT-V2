@@ -61,7 +61,9 @@ function App() {
       const bgColors = {
           'black': '#000000', 'onyx': '#0a0a0a', 'dark': '#0f0f0f', 'charcoal': '#161616',
           'anthracite': '#1a1a1a', 'slate': '#262626', 'night': '#333333', 'metal': '#4d4d4d',
-          'soft': '#f0f0f0', 'light': '#ffffff'
+          'soft': '#f0f0f0', 'light': '#ffffff', 'abyss': '#050a14', 'midnight': '#0a0c1a',
+          'space': '#0d0d12', 'volcano': '#1a0d0d', 'plum': '#1a0d1a', 'ocean': '#0d1a1a',
+          'forest': '#0d1a0d', 'concrete': '#808080', 'frost': '#e6f0f5', 'pearl': '#f5f5f5'
       };
       const targetColor = bgColors[themeId] || '#0f0f0f';
       document.body.style.backgroundColor = targetColor;

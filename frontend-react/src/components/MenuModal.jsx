@@ -10,12 +10,22 @@ const MenuModal = ({ isOpen, onClose }) => {
         { name: 'Noir Pur', color: '#000000', id: 'black' },
         { name: 'Onyx', color: '#0a0a0a', id: 'onyx' },
         { name: 'Sombre', color: '#0f0f0f', id: 'dark' },
+        { name: 'Abysse', color: '#050a14', id: 'abyss' },
+        { name: 'Minuit', color: '#0a0c1a', id: 'midnight' },
+        { name: 'Espace', color: '#0d0d12', id: 'space' },
         { name: 'Charbon', color: '#161616', id: 'charcoal' },
         { name: 'Anthracite', color: '#1a1a1a', id: 'anthracite' },
+        { name: 'Volcan', color: '#1a0d0d', id: 'volcano' },
+        { name: 'Prune', color: '#1a0d1a', id: 'plum' },
+        { name: 'Océan', color: '#0d1a1a', id: 'ocean' },
+        { name: 'Forêt', color: '#0d1a0d', id: 'forest' },
         { name: 'Ardoise', color: '#262626', id: 'slate' },
         { name: 'Nuit', color: '#333333', id: 'night' },
         { name: 'Métal', color: '#4d4d4d', id: 'metal' },
+        { name: 'Béton', color: '#808080', id: 'concrete' },
         { name: 'Doux', color: '#f0f0f0', id: 'soft' },
+        { name: 'Givre', color: '#e6f0f5', id: 'frost' },
+        { name: 'Perle', color: '#f5f5f5', id: 'pearl' },
         { name: 'Blanc', color: '#ffffff', id: 'light' },
     ];
 
@@ -79,23 +89,6 @@ const MenuModal = ({ isOpen, onClose }) => {
             default:
                 return (
                     <div className="flex flex-col gap-16 pb-20 animate-in fade-in duration-500">
-                        {/* Section Thème */}
-                        <section className="space-y-8">
-                            <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-red-500 text-center">Nuances de Thème</h4>
-                            <div className="p-10 rounded-[48px] bg-white/[0.02] border border-white/5 shadow-inner">
-                                <div className="grid grid-cols-5 md:grid-cols-10 gap-6">
-                                    {themes.map((t, i) => (
-                                        <button 
-                                            key={i}
-                                            onClick={() => callApi('set_theme', t.id)}
-                                            className="w-full aspect-square rounded-full border-2 border-white/10 hover:scale-125 hover:border-red-600 transition-all shadow-2xl"
-                                            style={{ backgroundColor: t.color }}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </section>
-
                         {/* Actions Principales */}
                         <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {menuItems.map((item, index) => (
@@ -113,6 +106,24 @@ const MenuModal = ({ isOpen, onClose }) => {
                                     </div>
                                 </button>
                             ))}
+                        </section>
+
+                        {/* Section Thème */}
+                        <section className="space-y-8">
+                            <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-red-500 text-center">Nuances de Thème</h4>
+                            <div className="p-10 rounded-[48px] bg-white/[0.02] border border-white/5 shadow-inner">
+                                <div className="grid grid-cols-5 md:grid-cols-10 gap-6">
+                                    {themes.map((t, i) => (
+                                        <button 
+                                            key={i}
+                                            onClick={() => callApi('set_theme', t.id)}
+                                            className="w-full aspect-square rounded-full border-2 border-white/10 hover:scale-125 hover:border-red-600 transition-all shadow-2xl"
+                                            style={{ backgroundColor: t.color }}
+                                            title={t.name}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
                         </section>
                         
                         <div className="flex flex-col items-center gap-6">
