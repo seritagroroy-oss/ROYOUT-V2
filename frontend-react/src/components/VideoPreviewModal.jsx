@@ -9,6 +9,7 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl }) => {
     const [metadata, setMetadata] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedFormat, setSelectedFormat] = useState(null);
+    const [error, setError] = useState(null);
     
     const isFavorite = favorites.some(f => f.url === videoUrl);
 
@@ -17,11 +18,13 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl }) => {
             analyze();
         } else {
             setMetadata(null);
+            setError(null);
         }
     }, [isOpen, videoUrl]);
 
     const analyze = async () => {
         setIsLoading(true);
+        setError(null);
         try {
             const res = await callApi('get_video_info', videoUrl);
             if (res && res.status === 'success') {
@@ -30,7 +33,11 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl }) => {
                 if (res.formats && res.formats.length > 0) {
                     setSelectedFormat(res.formats[0].id);
                 }
+            } else {
+                setError(res?.message || "Impossible de charger les informations de la vidéo.");
             }
+        } catch (err) {
+            setError("Erreur de communication avec le serveur.");
         } finally {
             setIsLoading(false);
         }
@@ -99,7 +106,7 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl }) => {
                                         `}
                                     >
                                         <span className="text-xs font-black">{f.label}</span>
-                                        <span className="text-[9px] opacity-60 uppercase tracking-widest">{f.ext} • {f.filesize}</span>
+                                        <span className="text-[9px] opacity-60 uppercase tracking-widest">{f.ext}</span>
                                     </button>
                                 ))}
                             </div>
@@ -113,11 +120,23 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl }) => {
                         </button>
                     </div>
                 </div>
-            ) : (
-                <div className="text-center py-20 text-red-500 font-bold">
-                    Impossible de charger les informations de la vidéo.
+            ) : error ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center gap-6">
+                    <div className="w-20 h-20 rounded-full bg-red-600/10 flex items-center justify-center text-red-600 text-3xl">
+                        <i className="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div className="max-w-md space-y-2">
+                        <p className="text-lg font-black text-white uppercase tracking-tighter">Erreur d'analyse</p>
+                        <p className="text-sm text-white/40 leading-relaxed">{error}</p>
+                    </div>
+                    <button 
+                        onClick={analyze}
+                        className="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                    >
+                        Réessayer l'analyse
+                    </button>
                 </div>
-            )}
+            ) : null}
         </Modal>
     );
 };

@@ -622,12 +622,12 @@ class Api:
             ydl_opts = {
                 'quiet': True, 
                 'no_warnings': True, 
-                'extract_flat': 'in_playlist',
                 'nocheckcertificate': True,
                 'cachedir': False,
                 'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                 'referer': 'https://www.youtube.com/',
-                'socket_timeout': 10
+                'socket_timeout': 30, # Augmentation du timeout pour les connexions lentes
+                'ignore_no_formats_error': True
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
