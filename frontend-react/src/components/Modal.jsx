@@ -39,7 +39,7 @@ const Modal = ({ isOpen, onClose, title, children, fullScreen = false, maxWidth 
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Header */}
-                            <div className={`px-8 py-10 border-b border-white/5 flex items-center justify-between bg-white/[0.02] ${fullScreen ? 'pt-16' : ''}`}>
+                            <div className={`px-8 py-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02] ${fullScreen ? 'pt-10' : ''}`}>
                                 <div>
                                     <h2 className="text-3xl font-black uppercase tracking-[0.2em] text-white flex items-center gap-4">
                                         <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
