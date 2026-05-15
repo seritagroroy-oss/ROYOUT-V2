@@ -11,7 +11,7 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl }) => {
     const [selectedFormat, setSelectedFormat] = useState(null);
     const [error, setError] = useState(null);
     
-    const isFavorite = favorites.some(f => f.url === videoUrl);
+    const isFavorite = favorites?.some(f => f.url === videoUrl) || false;
 
     useEffect(() => {
         if (isOpen && videoUrl) {

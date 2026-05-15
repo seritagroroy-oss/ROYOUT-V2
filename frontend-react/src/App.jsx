@@ -176,8 +176,9 @@ function App() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               <AnimatePresence mode='popLayout'>
-                {searchResults.map((video, index) => {
-                  const isFavorite = favorites.some(f => f.url === video.url);
+                {searchResults && searchResults.map((video, index) => {
+                  if (!video) return null;
+                  const isFavorite = favorites?.some(f => f.url === video.url) || false;
                   return (
                     <motion.div
                       key={video.url + index}

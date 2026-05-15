@@ -1046,8 +1046,8 @@ def start_app():
 
     try:
         # Lancement avec icône mais sans GPU pour la stabilité
-        # debug=False par défaut pour éviter les spams de logs et les erreurs d'accessibilité
-        webview.start(debug=False, icon=icon_path, http_server=True)
+        # debug=True pour permettre d'inspecter l'élément (clic droit) et voir les erreurs JS
+        webview.start(debug=True, icon=icon_path, http_server=True)
     except Exception as e:
         api._log(f"ERREUR FATALE: {e}")
 

@@ -6,7 +6,7 @@ const Modal = ({ isOpen, onClose, title, children, fullScreen = false, maxWidth 
         <AnimatePresence mode="wait">
             {isOpen && (
                 <motion.div 
-                    key="modal-container"
+                    key={title || 'modal-container'}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
