@@ -90,6 +90,16 @@
   color: #aaaaaa !important;
 }
 
+/* Badges Vidéo en mode clair */
+.light-mode .badge-duration {
+  background: #dc2626 !important;
+  border-color: #ef4444 !important;
+}
+.light-mode .badge-type {
+  background: #1a1a1a !important;
+  border-color: #333333 !important;
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;
