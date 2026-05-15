@@ -136,25 +136,36 @@ const MenuModal = ({ isOpen, onClose }) => {
                 );
             case 'faq':
                 return (
-                    <div className="flex flex-col gap-10 animate-in fade-in duration-500">
-                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all">
+                    <div className="flex flex-col gap-10 animate-in fade-in duration-500 max-h-[80vh] overflow-y-auto pr-4 custom-scrollbar">
+                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 bg-[#0f0f0f] z-10 py-4">
                             <i className="fas fa-arrow-left"></i> Retour
                         </button>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {[
-                                { q: "Comment télécharger ?", a: "Copiez simplement l'URL d'une vidéo YouTube et collez-la dans la barre de recherche. Cliquez ensuite sur l'icône de téléchargement sur la miniature." },
-                                { q: "Où sont mes fichiers ?", a: "Par défaut, les fichiers sont enregistrés dans le dossier 'Downloads/RoYout' de votre profil utilisateur. Vous pouvez changer cela dans les options de téléchargement." },
-                                { q: "Le téléchargement échoue ?", a: "Assurez-vous d'avoir une connexion internet stable. Si le problème persiste, vérifiez les mises à jour pour obtenir la dernière version de yt-dlp." },
-                                { q: "Supporte-t-il les playlists ?", a: "Oui, RoYout peut traiter des playlists entières. Collez simplement le lien de la playlist et choisissez d'importer toutes les vidéos." }
-                            ].map((item, i) => (
-                                <div key={i} className="p-8 bg-white/[0.02] rounded-3xl border border-white/5 hover:border-red-500/20 transition-all">
-                                    <h4 className="font-bold text-white mb-4 flex items-center gap-3">
-                                        <span className="w-6 h-6 rounded-lg bg-red-600/20 text-red-500 flex items-center justify-center text-[10px]">Q</span>
-                                        {item.q}
-                                    </h4>
-                                    <p className="text-sm text-white/40 leading-relaxed">{item.a}</p>
-                                </div>
-                            ))}
+                        
+                        <div className="space-y-12 pb-10">
+                            <div className="text-center space-y-4">
+                                <h3 className="text-3xl font-black text-white">Foire Aux Questions</h3>
+                                <p className="text-white/40">Tout ce que vous devez savoir sur RoYout.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {[
+                                    { q: "Est-ce que RoYout est vraiment gratuit ?", a: "Oui, RoYout est 100% gratuit. Il n'y a aucun frais d'inscription, ni de fonctionnalités premium cachées. L'outil a été développé par SERI TAGRO ROY dans un esprit de partage et de performance." },
+                                    { q: "Quels formats de fichiers sont supportés ?", a: "Vous pouvez télécharger vos vidéos en format MP4 ou WebM. Pour l'audio uniquement, l'application propose une conversion directe en MP3 de haute qualité (320 kbps)." },
+                                    { q: "Puis-je télécharger des vidéos en 4K ?", a: "Absolument. Si la vidéo d'origine est disponible en 4K ou en 1080p, RoYout vous permettra de sélectionner ces résolutions. L'application se charge de fusionner automatiquement la vidéo et l'audio pour vous offrir le meilleur rendu possible." },
+                                    { q: "L'application fonctionne-t-elle sur Mac et Windows ?", a: "La version actuelle est optimisée pour Windows. Une version pour d'autres systèmes d'exploitation est à l'étude pour permettre à tout le monde de profiter de l'expérience RoYout." },
+                                    { q: "Pourquoi utilisez-vous un hébergeur gratuit (Vercel) ?", a: "Nous avons choisi Vercel car l'application est récente et, comme c'est un début, nos moyens ne nous permettent pas encore de louer un serveur dédié. Nous y songeons sérieusement pour le futur. Ce choix technique n'affecte en rien la sécurité de l'outil : RoYout est sain, sans aucun logiciel malveillant." },
+                                    { q: "Mon antivirus bloque l'installation ?", a: "Comme RoYout est indépendant et récent, il n'est pas encore 'signé'. Il est possible que Windows SmartScreen affiche une alerte. Vous pouvez ignorer ce message en cliquant sur 'Informations complémentaires' puis 'Exécuter quand même'. L'application est 100% sûre." },
+                                    { q: "Est-ce légal d'utiliser RoYout ?", a: "RoYout est un outil technique. Vous êtes responsable de l'usage que vous en faites. Nous vous recommandons de l'utiliser pour télécharger vos propres contenus, des vidéos libres de droits ou pour un usage strictement privé." }
+                                ].map((item, i) => (
+                                    <div key={i} className="p-8 bg-white/[0.02] rounded-[32px] border border-white/5 hover:border-red-500/20 transition-all group">
+                                        <h4 className="font-bold text-white mb-4 flex items-start gap-4">
+                                            <span className="w-8 h-8 rounded-xl bg-red-600/10 text-red-500 flex items-center justify-center text-xs font-black flex-shrink-0">Q</span>
+                                            <span className="group-hover:text-red-500 transition-colors">{item.q}</span>
+                                        </h4>
+                                        <p className="text-xs text-white/30 leading-relaxed pl-12">{item.a}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 );
