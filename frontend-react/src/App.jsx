@@ -256,7 +256,7 @@ function App() {
               >
                   <button 
                     onClick={handleLoadMore}
-                    className="group flex items-center gap-8 px-16 py-8 bg-gradient-to-br from-[var(--theme-card)] to-transparent hover:from-red-600 hover:to-red-500 border border-[var(--theme-border)] hover:border-red-500/50 rounded-[40px] transition-all duration-500 shadow-[var(--theme-shadow)] hover:shadow-red-600/20 active:scale-95"
+                    className="group btn-load-more flex items-center gap-8 px-16 py-8 bg-gradient-to-br from-[var(--theme-card)] to-transparent hover:from-red-600 hover:to-red-500 border border-[var(--theme-border)] hover:border-red-500/50 rounded-[40px] transition-all duration-500 shadow-[var(--theme-shadow)] hover:shadow-red-600/20 active:scale-95"
                   >
                       <div className="flex flex-col items-start gap-1 text-left">
                           <span className="text-[11px] font-black uppercase tracking-[0.5em] group-hover:text-white text-[var(--theme-text-dim)] transition-colors">Afficher plus de vidéos</span>

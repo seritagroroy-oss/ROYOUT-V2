@@ -62,6 +62,25 @@
   filter: blur(250px);
 }
 
+/* Style spécial pour le bouton Load More en mode clair */
+.light-mode .btn-load-more {
+  background: #dc2626 !important;
+  border-color: #ef4444 !important;
+}
+.light-mode .btn-load-more span, 
+.light-mode .btn-load-more i {
+  color: white !important;
+}
+
+.light-mode .btn-load-more:hover {
+  background: white !important;
+  border-color: #dc2626 !important;
+}
+.light-mode .btn-load-more:hover span,
+.light-mode .btn-load-more:hover i {
+  color: #dc2626 !important;
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;
