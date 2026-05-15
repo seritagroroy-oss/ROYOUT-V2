@@ -8,4 +8,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  base: './', // Assure que les chemins d'accès aux assets sont relatifs pour pywebview
 })
