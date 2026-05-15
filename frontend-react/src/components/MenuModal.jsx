@@ -8,19 +8,19 @@ const MenuModal = ({ isOpen, onClose }) => {
 
     const themes = [
         { name: 'Noir Pur', color: '#000000', id: 'black' },
-        { name: 'Onyx', color: '#0a0a0a', id: 'onyx' },
-        { name: 'Sombre', color: '#0f0f0f', id: 'dark' },
-        { name: 'Abysse', color: '#050a14', id: 'abyss' },
-        { name: 'Minuit', color: '#0a0c1a', id: 'midnight' },
-        { name: 'Espace', color: '#0d0d12', id: 'space' },
-        { name: 'Charbon', color: '#161616', id: 'charcoal' },
+        { name: 'Onyx', color: '#0a0a0a', id: 'onyx', recommended: true },
+        { name: 'Sombre', color: '#0f0f0f', id: 'dark', recommended: true },
+        { name: 'Abysse', color: '#050a14', id: 'abyss', recommended: true },
+        { name: 'Minuit', color: '#0a0c1a', id: 'midnight', recommended: true },
+        { name: 'Espace', color: '#0d0d12', id: 'space', recommended: true },
+        { name: 'Charbon', color: '#161616', id: 'charcoal', recommended: true },
         { name: 'Anthracite', color: '#1a1a1a', id: 'anthracite' },
-        { name: 'Volcan', color: '#1a0d0d', id: 'volcano' },
-        { name: 'Prune', color: '#1a0d1a', id: 'plum' },
-        { name: 'Océan', color: '#0d1a1a', id: 'ocean' },
-        { name: 'Forêt', color: '#0d1a0d', id: 'forest' },
-        { name: 'Ardoise', color: '#262626', id: 'slate' },
-        { name: 'Nuit', color: '#333333', id: 'night' },
+        { name: 'Volcan', color: '#1a0d0d', id: 'volcano', recommended: true },
+        { name: 'Prune', color: '#1a0d1a', id: 'plum', recommended: true },
+        { name: 'Océan', color: '#0d1a1a', id: 'ocean', recommended: true },
+        { name: 'Forêt', color: '#0d1a0d', id: 'forest', recommended: true },
+        { name: 'Ardoise', color: '#262626', id: 'slate', recommended: true },
+        { name: 'Nuit', color: '#333333', id: 'night', recommended: true },
         { name: 'Métal', color: '#4d4d4d', id: 'metal' },
         { name: 'Béton', color: '#808080', id: 'concrete' },
         { name: 'Doux', color: '#f0f0f0', id: 'soft' },
@@ -281,13 +281,17 @@ const MenuModal = ({ isOpen, onClose }) => {
                             <div className="p-10 rounded-[48px] bg-white/[0.02] border border-white/5 shadow-inner">
                                 <div className="grid grid-cols-5 md:grid-cols-10 gap-6">
                                     {themes.map((t, i) => (
-                                        <button 
-                                            key={i}
-                                            onClick={() => callApi('set_theme', t.id)}
-                                            className="w-full aspect-square rounded-full border-2 border-white/10 hover:scale-125 hover:border-red-600 transition-all shadow-2xl"
-                                            style={{ backgroundColor: t.color }}
-                                            title={t.name}
-                                        />
+                                        <div key={i} className="relative group/theme">
+                                            <button 
+                                                onClick={() => callApi('set_theme', t.id)}
+                                                className={`w-full aspect-square rounded-full border-2 transition-all shadow-2xl hover:scale-125 ${t.recommended ? 'border-red-500/50 shadow-[0_0_15px_rgba(220,38,38,0.3)]' : 'border-white/10 hover:border-red-600'}`}
+                                                style={{ backgroundColor: t.color }}
+                                                title={t.name}
+                                            />
+                                            {t.recommended && (
+                                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border-2 border-[#0f0f0f] z-10" title="Recommandé"></div>
+                                            )}
+                                        </div>
                                     ))}
                                 </div>
                             </div>
