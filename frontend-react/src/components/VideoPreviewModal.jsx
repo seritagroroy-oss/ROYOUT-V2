@@ -51,13 +51,13 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
             const res = await callApi('download_playlist', metadata.entries, selectedFormat, "");
             if (res.status === 'success') {
                 if (onDownloadStarted) onDownloadStarted();
-                onClose();
+                else onClose();
             }
         } else {
             const res = await callApi('download_video', videoUrl, selectedFormat, "");
             if (res.status === 'success') {
                 if (onDownloadStarted) onDownloadStarted();
-                onClose();
+                else onClose();
             }
         }
     };
