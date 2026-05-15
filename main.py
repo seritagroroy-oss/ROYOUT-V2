@@ -93,7 +93,7 @@ class Api:
         self._log(f"--- Démarrage de RoYout v{self.VERSION} ---")
         
         # Tâches de fond (Réactivées après stabilisation)
-        threading.Thread(target=self._check_updates_ytdlp, daemon=True).start()
+        threading.Thread(target=self._run_engine_update, daemon=True).start()
         threading.Thread(target=self._check_app_version, daemon=True).start()
         threading.Thread(target=self._check_ffmpeg, daemon=True).start()
         # threading.Thread(target=self._clipboard_monitor, daemon=True).start()
