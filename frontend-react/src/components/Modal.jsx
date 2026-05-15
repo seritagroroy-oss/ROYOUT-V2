@@ -39,19 +39,19 @@ const Modal = ({ isOpen, onClose, title, children, fullScreen = false, maxWidth 
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Header */}
-                            <div className={`px-8 py-3 border-b border-white/5 flex items-center justify-between bg-white/[0.02] ${fullScreen ? 'pt-6' : ''}`}>
+                            <div className={`px-8 py-2 border-b border-white/5 flex items-center justify-between bg-white/[0.02] ${fullScreen ? 'pt-4' : ''}`}>
                                 <div>
-                                    <h2 className="text-3xl font-black uppercase tracking-[0.2em] text-white flex items-center gap-4">
-                                        <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
+                                    <h2 className="text-xl font-black uppercase tracking-[0.2em] text-white flex items-center gap-3">
+                                        <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
                                         {title}
                                     </h2>
-                                    {fullScreen && <p className="text-[10px] text-white/20 uppercase tracking-[0.4em] font-black mt-2">Expérience RoYout Premium</p>}
+                                    {fullScreen && <p className="text-[8px] text-white/20 uppercase tracking-[0.4em] font-black mt-1">Expérience RoYout Premium</p>}
                                 </div>
                                 <button 
                                     onClick={onClose}
-                                    className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-red-600 hover:scale-110 flex items-center justify-center text-white/40 hover:text-white transition-all shadow-xl"
+                                    className="w-10 h-10 rounded-xl bg-white/5 hover:bg-red-600 hover:scale-110 flex items-center justify-center text-white/40 hover:text-white transition-all shadow-xl"
                                 >
-                                    <i className="fas fa-times text-lg"></i>
+                                    <i className="fas fa-times text-sm"></i>
                                 </button>
                             </div>
 
