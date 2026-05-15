@@ -63,7 +63,9 @@ function App() {
           'anthracite': '#1a1a1a', 'slate': '#262626', 'night': '#333333', 'metal': '#4d4d4d',
           'soft': '#f0f0f0', 'light': '#ffffff', 'abyss': '#050a14', 'midnight': '#0a0c1a',
           'space': '#0d0d12', 'volcano': '#1a0d0d', 'plum': '#1a0d1a', 'ocean': '#0d1a1a',
-          'forest': '#0d1a0d', 'concrete': '#808080', 'frost': '#e6f0f5', 'pearl': '#f5f5f5'
+          'forest': '#0d1a0d', 'concrete': '#808080', 'frost': '#e6f0f5', 'pearl': '#f5f5f5',
+          'vsdark': '#1e1e1e', 'onedark': '#282c34', 'dracula': '#282a36', 'monokai': '#272822',
+          'github': '#0d1117', 'nord': '#2e3440', 'solarized': '#002b36'
       };
       const targetColor = bgColors[themeId] || '#0f0f0f';
       document.body.style.backgroundColor = targetColor;

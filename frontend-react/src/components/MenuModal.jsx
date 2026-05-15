@@ -27,6 +27,14 @@ const MenuModal = ({ isOpen, onClose }) => {
         { name: 'Givre', color: '#e6f0f5', id: 'frost' },
         { name: 'Perle', color: '#f5f5f5', id: 'pearl' },
         { name: 'Blanc', color: '#ffffff', id: 'light' },
+        // Thèmes VSCode
+        { name: 'VS Dark', color: '#1e1e1e', id: 'vsdark' },
+        { name: 'One Dark', color: '#282c34', id: 'onedark' },
+        { name: 'Dracula', color: '#282a36', id: 'dracula' },
+        { name: 'Monokai', color: '#272822', id: 'monokai' },
+        { name: 'GitHub', color: '#0d1117', id: 'github' },
+        { name: 'Nord', color: '#2e3440', id: 'nord' },
+        { name: 'Solarized', color: '#002b36', id: 'solarized' },
     ];
 
     const menuItems = [
