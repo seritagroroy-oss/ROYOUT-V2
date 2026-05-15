@@ -9,6 +9,7 @@ import sys
 from PIL import Image
 import pystray
 from pystray import MenuItem as item
+from plyer import notification
 
 # Augmentation de la limite de récursion pour éviter les crashs liés à l'AccessibilityObject sur Windows
 sys.setrecursionlimit(10000)
