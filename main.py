@@ -1021,11 +1021,19 @@ def start_app():
     api = Api()
     
     # --- MIGRATION REACT ---
-    DEV_MODE = True 
+    # Désactivez DEV_MODE pour charger les fichiers locaux compilés
+    DEV_MODE = False 
+    
     if DEV_MODE:
         index_html = 'http://localhost:5173'
     else:
-        index_html = resource_path('ui/index.html')
+        # On cherche d'abord dans le dossier dist de React
+        react_dist = os.path.join(os.getcwd(), 'frontend-react', 'dist', 'index.html')
+        if os.path.exists(react_dist):
+            index_html = react_dist
+        else:
+            # Fallback sur l'ancien dossier UI si React n'est pas compilé
+            index_html = resource_path('ui/index.html')
     # -----------------------
 
     window = webview.create_window("RoYout (React Edition)", index_html, js_api=api, width=1200, height=850, background_color='#0f0f0f', frameless=False)
