@@ -16,8 +16,8 @@ const UpdateModal = ({ isOpen, onClose, version }) => {
                 </div>
 
                 <div className="max-w-2xl space-y-6">
-                    <h3 className="text-5xl font-black tracking-tighter uppercase">Une nouvelle version est là !</h3>
-                    <p className="text-xl text-white/40 leading-relaxed font-medium">
+                    <h3 className="text-5xl font-black tracking-tighter uppercase text-[var(--theme-text)]">Une nouvelle version est là !</h3>
+                    <p className="text-xl text-[var(--theme-text-dim)] leading-relaxed font-medium">
                         La version <span className="text-red-500 font-black">v{version}</span> de RoYout est disponible. 
                         Elle apporte des correctifs de stabilité, une meilleure vitesse de téléchargement et de nouvelles fonctionnalités.
                     </p>
@@ -29,7 +29,7 @@ const UpdateModal = ({ isOpen, onClose, version }) => {
                             callApi('open_external_link', 'https://royout.vercel.app/');
                             onClose();
                         }}
-                        className="bg-white text-black p-6 rounded-[32px] font-black text-xs uppercase tracking-[0.3em] hover:bg-red-600 hover:text-white transition-all shadow-2xl hover:scale-105"
+                        className="bg-[var(--theme-text)] text-[var(--theme-bg)] p-6 rounded-[32px] font-black text-xs uppercase tracking-[0.3em] hover:bg-red-600 hover:text-white transition-all shadow-2xl hover:scale-105"
                     >
                         Télécharger maintenant
                     </button>
@@ -38,15 +38,15 @@ const UpdateModal = ({ isOpen, onClose, version }) => {
                             callApi('mark_update_as_ignored');
                             onClose();
                         }}
-                        className="bg-white/5 text-white/40 p-6 rounded-[32px] font-black text-xs uppercase tracking-[0.3em] hover:bg-white/10 transition-all border border-white/5"
+                        className="bg-[var(--theme-card)] text-[var(--theme-text-dim)] p-6 rounded-[32px] font-black text-xs uppercase tracking-[0.3em] hover:bg-[var(--theme-card-hover)] transition-all border border-[var(--theme-border)]"
                     >
                         Plus tard (7 jours)
                     </button>
                 </div>
 
-                <div className="mt-10 p-8 rounded-[40px] bg-white/[0.02] border border-white/5 text-left w-full max-w-4xl">
+                <div className="mt-10 p-8 rounded-[40px] bg-[var(--theme-card)] border border-[var(--theme-border)] text-left w-full max-w-4xl shadow-[var(--theme-shadow)]">
                     <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500 mb-6">Notes de version</h4>
-                    <ul className="space-y-4 text-sm text-white/60">
+                    <ul className="space-y-4 text-sm text-[var(--theme-text-dim)]">
                         <li className="flex gap-4"><i className="fas fa-check text-green-500 mt-1"></i> Migration complète vers l'architecture React & Vite.</li>
                         <li className="flex gap-4"><i className="fas fa-check text-green-500 mt-1"></i> Optimisation des moteurs de recherche YouTube.</li>
                         <li className="flex gap-4"><i className="fas fa-check text-green-500 mt-1"></i> Nouveau design Premium avec animations fluides.</li>
