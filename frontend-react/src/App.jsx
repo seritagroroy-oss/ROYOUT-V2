@@ -12,9 +12,8 @@ import SplashScreen from './components/SplashScreen'
 import { useAppState } from './context/AppContext'
 import { useApi } from './hooks/useApi'
 
-// --- BRANCHEMENTS GLOBAUX (HORS COMPOSANT POUR DISPONIBILITÉ IMMÉDIATE) ---
+// --- BRANCHEMENTS GLOBAUX ---
 window.showToast = (msg) => {
-    console.log("RoYout Notification:", msg);
     const toast = document.createElement('div');
     toast.className = 'fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] bg-red-600 text-white px-10 py-5 rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-red-600/20 border border-white/20 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-4';
     toast.innerHTML = `<i class="fas fa-info-circle"></i><span>${msg}</span>`;
@@ -28,9 +27,15 @@ window.showToast = (msg) => {
 function App() {
   const { isReady, callApi } = useApi();
   const { setIsLoading, isLoading } = useAppState();
+  
+  // États de recherche
   const [searchResults, setSearchResults] = useState([]);
   const [discoveryTitle, setDiscoveryTitle] = useState('Découvrir');
+  const [currentQuery, setCurrentQuery] = useState('Musique');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   
+  // États des modales
   const [modals, setModals] = useState({
     history: false,
     favorites: false,
@@ -39,71 +44,88 @@ function App() {
     menu: false,
     update: false
   });
+  
   const [updateVersion, setUpdateVersion] = useState('0.0.0');
   const [activeVideoUrl, setActiveVideoUrl] = useState(null);
 
-  // Enregistrement des fonctions de retour Python -> React
   useEffect(() => {
     window.showUpdateModal = (version) => {
       setUpdateVersion(version);
-      setModals(prev => ({ ...prev, update: true }));
+      openExclusiveModal('update');
     };
 
     window.applyTheme = (themeId) => {
-      console.log("Changement de thème reçu:", themeId);
       const bgColors = {
-          'black': '#000000',
-          'onyx': '#0a0a0a',
-          'dark': '#0f0f0f',
-          'charcoal': '#161616',
-          'anthracite': '#1a1a1a',
-          'slate': '#262626',
-          'night': '#333333',
-          'metal': '#4d4d4d',
-          'soft': '#f0f0f0',
-          'light': '#ffffff'
+          'black': '#000000', 'onyx': '#0a0a0a', 'dark': '#0f0f0f', 'charcoal': '#161616',
+          'anthracite': '#1a1a1a', 'slate': '#262626', 'night': '#333333', 'metal': '#4d4d4d',
+          'soft': '#f0f0f0', 'light': '#ffffff'
       };
       const targetColor = bgColors[themeId] || '#0f0f0f';
       document.body.style.backgroundColor = targetColor;
       document.documentElement.style.backgroundColor = targetColor;
-      
-      if (themeId === 'light' || themeId === 'soft') {
-        document.documentElement.classList.add('light-mode');
-      } else {
-        document.documentElement.classList.remove('light-mode');
-      }
-      window.showToast(`Thème ${themeId} appliqué`);
+      if (themeId === 'light' || themeId === 'soft') document.documentElement.classList.add('light-mode');
+      else document.documentElement.classList.remove('light-mode');
     };
 
     if (isReady) {
-      loadDiscovery();
+      loadDiscovery("Musique", 1, false);
     }
   }, [isReady]);
 
-  const loadDiscovery = async (query = "Musique") => {
+  const loadDiscovery = async (query, page = 1, append = false) => {
     setIsLoading(true);
     try {
-      const res = await callApi('search_videos', query, 1, 20, 0, 'mixed');
+      const startOffset = (page - 1) * 20 + 1;
+      const res = await callApi('search_videos', query, startOffset, 20, 0, 'mixed');
       if (res && res.status === 'success') {
-        setSearchResults(res.results);
+        if (append) {
+          setSearchResults(prev => [...prev, ...res.results]);
+        } else {
+          setSearchResults(res.results);
+          setCurrentPage(1);
+        }
+        // On considère qu'il y a plus si on a reçu au moins 20 résultats
+        setHasMore(res.results.length >= 20);
       }
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleLoadMore = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    loadDiscovery(currentQuery, nextPage, true);
+  };
+
   const handleAnalyze = (query) => {
     if (query.includes('youtube.com/') || query.includes('youtu.be/')) {
        setActiveVideoUrl(query);
-       toggleModal('preview', true);
+       openExclusiveModal('preview');
     } else {
+       setCurrentQuery(query);
        setDiscoveryTitle(`Résultats pour : ${query}`);
-       loadDiscovery(query);
+       loadDiscovery(query, 1, false);
     }
   };
 
-  const toggleModal = (name, state) => {
-    setModals(prev => ({ ...prev, [name]: state }));
+  // Nouvelle fonction pour n'ouvrir qu'UNE SEULE modale à la fois
+  const openExclusiveModal = (name) => {
+    setModals({
+        history: name === 'history',
+        favorites: name === 'favorites',
+        preview: name === 'preview',
+        queue: name === 'queue',
+        menu: name === 'menu',
+        update: name === 'update'
+    });
+  };
+
+  const closeModals = () => {
+    setModals({
+        history: false, favorites: false, preview: false,
+        queue: false, menu: false, update: false
+    });
   };
 
   return (
@@ -111,10 +133,10 @@ function App() {
       <SplashScreen />
 
       <Navbar 
-        onOpenHistory={() => toggleModal('history', true)}
-        onOpenFavorites={() => toggleModal('favorites', true)}
-        onOpenQueue={() => toggleModal('queue', true)}
-        onOpenMenu={() => toggleModal('menu', true)}
+        onOpenHistory={() => openExclusiveModal('history')}
+        onOpenFavorites={() => openExclusiveModal('favorites')}
+        onOpenQueue={() => openExclusiveModal('queue')}
+        onOpenMenu={() => openExclusiveModal('menu')}
       />
       
       <main className="flex-1 overflow-y-auto custom-scrollbar px-8 scroll-smooth">
@@ -161,7 +183,7 @@ function App() {
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.4, delay: (index * 0.05) + 3.6 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
                     onClick={() => handleAnalyze(video.url)}
                     className="group cursor-pointer flex flex-col gap-4 p-4 rounded-[32px] bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-red-500/30 transition-all duration-500"
                   >
@@ -190,24 +212,52 @@ function App() {
                 ))}
               </AnimatePresence>
             </div>
+
+            {/* BOUTON PLUS DE VIDÉOS */}
+            {hasMore && !isLoading && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-20 flex justify-center pb-20"
+              >
+                  <button 
+                    onClick={handleLoadMore}
+                    className="group flex items-center gap-8 px-16 py-8 bg-gradient-to-br from-white/[0.05] to-transparent hover:from-red-600 hover:to-red-500 border border-white/10 hover:border-red-500/50 rounded-[40px] transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-red-600/20 active:scale-95"
+                  >
+                      <div className="flex flex-col items-start gap-1 text-left">
+                          <span className="text-[11px] font-black uppercase tracking-[0.5em] group-hover:text-white text-white/60 transition-colors">Afficher plus de vidéos</span>
+                          <span className="text-[8px] font-medium text-white/20 group-hover:text-white/60 uppercase tracking-widest transition-colors">Charger les résultats suivants</span>
+                      </div>
+                      <div className="w-12 h-12 rounded-full bg-white/5 group-hover:bg-white/20 flex items-center justify-center transition-all">
+                          <i className="fas fa-chevron-down text-sm opacity-40 group-hover:opacity-100 group-hover:animate-bounce text-white"></i>
+                      </div>
+                  </button>
+              </motion.div>
+            )}
+
+            {isLoading && searchResults.length > 0 && (
+                <div className="mt-20 flex justify-center">
+                    <div className="w-8 h-8 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin"></div>
+                </div>
+            )}
           </section>
 
         </div>
       </main>
 
-      <HistoryModal isOpen={modals.history} onClose={() => toggleModal('history', false)} />
+      <HistoryModal isOpen={modals.history} onClose={closeModals} />
       <FavoritesModal 
         isOpen={modals.favorites} 
-        onClose={() => toggleModal('favorites', false)} 
+        onClose={closeModals} 
         onAnalyze={(url) => handleAnalyze(url)} 
       />
-      <QueueModal isOpen={modals.queue} onClose={() => toggleModal('queue', false)} />
-      <MenuModal isOpen={modals.menu} onClose={() => toggleModal('menu', false)} />
-      <UpdateModal isOpen={modals.update} onClose={() => toggleModal('update', false)} version={updateVersion} />
+      <QueueModal isOpen={modals.queue} onClose={closeModals} />
+      <MenuModal isOpen={modals.menu} onClose={closeModals} />
+      <UpdateModal isOpen={modals.update} onClose={closeModals} version={updateVersion} />
       
       <VideoPreviewModal 
         isOpen={modals.preview} 
-        onClose={() => toggleModal('preview', false)} 
+        onClose={closeModals} 
         videoUrl={activeVideoUrl}
       />
 

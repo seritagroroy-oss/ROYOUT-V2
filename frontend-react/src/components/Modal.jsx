@@ -3,9 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const Modal = ({ isOpen, onClose, title, children, fullScreen = false, maxWidth = 'max-w-4xl' }) => {
     return (
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
             {isOpen && (
-                <>
+                <motion.div 
+                    key="modal-container"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[2000]"
+                >
                     {/* Backdrop */}
                     {!fullScreen && (
                         <motion.div 
@@ -57,7 +63,7 @@ const Modal = ({ isOpen, onClose, title, children, fullScreen = false, maxWidth 
                             </div>
                         </div>
                     </motion.div>
-                </>
+                </motion.div>
             )}
         </AnimatePresence>
     );

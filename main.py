@@ -961,12 +961,6 @@ class Api:
         except Exception as e:
             self._log(f"Backend: ERREUR RECHERCHE -> {str(e)}")
             return {"status": "error", "message": str(e)}
-        except Exception as e:
-            self._log(f"Backend: ERREUR RECHERCHE -> {str(e)}")
-            return {"status": "error", "message": str(e)}
-        except Exception as e:
-            self._log(f"Backend: ERREUR RECHERCHE -> {str(e)}")
-            return {"status": "error", "message": str(e)}
 
     def get_home_videos(self):
         """Retourne les vidéos de la page d'accueil (Tendances/Populaires)"""

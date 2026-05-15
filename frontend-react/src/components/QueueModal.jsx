@@ -19,7 +19,7 @@ const QueueModal = ({ isOpen, onClose }) => {
         setIsLoading(true);
         try {
             const res = await callApi('get_queue');
-            if (res) setQueue(res);
+            if (res) setQueue(res.queue || []);
         } finally {
             setIsLoading(false);
         }
@@ -53,11 +53,11 @@ const QueueModal = ({ isOpen, onClose }) => {
                                 <div className="flex items-center gap-6">
                                     <div className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-white/40">
                                         <i className="fas fa-cog fa-spin text-red-500"></i>
-                                        Format: <span className="text-white">{item.format}</span>
+                                        Format: <span className="text-white">{item.resolution || item.format_id}</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-white/40">
                                         <i className="fas fa-folder"></i>
-                                        Dossier: <span className="text-white">{item.folder}</span>
+                                        Dossier: <span className="text-white truncate max-w-[200px]">{item.folder}</span>
                                     </div>
                                 </div>
                             </div>
@@ -65,9 +65,6 @@ const QueueModal = ({ isOpen, onClose }) => {
                                 <div className="px-6 py-3 rounded-2xl bg-red-600/10 text-red-500 text-[10px] font-black uppercase tracking-[0.2em] border border-red-600/20">
                                     En attente
                                 </div>
-                                <button className="w-14 h-14 rounded-2xl bg-white/5 hover:bg-red-600/20 flex items-center justify-center text-white/20 hover:text-red-500 transition-all">
-                                    <i className="fas fa-trash-alt text-lg"></i>
-                                </button>
                             </div>
                         </div>
                     ))}
