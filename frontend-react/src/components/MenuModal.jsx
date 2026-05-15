@@ -67,50 +67,70 @@ const MenuModal = ({ isOpen, onClose }) => {
         switch (view) {
             case 'about':
                 return (
-                    <div className="flex flex-col gap-10 animate-in fade-in duration-500">
-                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all">
+                    <div className="flex flex-col gap-10 animate-in fade-in duration-500 max-h-[80vh] overflow-y-auto pr-4 custom-scrollbar">
+                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 bg-[#0f0f0f] z-10 py-4">
                             <i className="fas fa-arrow-left"></i> Retour
                         </button>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="p-12 bg-white/[0.02] rounded-[40px] border border-white/5 space-y-8">
-                                <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-red-600/20">
-                                    <i className="fas fa-rocket text-2xl text-white"></i>
-                                </div>
-                                <h3 className="text-4xl font-black italic tracking-tighter text-white">RoYout v2.0</h3>
-                                <p className="text-xl text-white/60 leading-relaxed font-medium">
-                                    L'outil ultime de téléchargement multimédia, conçu pour la performance brute et l'élégance visuelle.
+                        
+                        <div className="space-y-12 pb-10">
+                            {/* La Genèse */}
+                            <section className="p-12 bg-white/[0.02] rounded-[40px] border border-white/5 space-y-6">
+                                <h3 className="text-2xl font-black text-red-500 uppercase tracking-widest">La Genèse du Projet</h3>
+                                <p className="text-lg text-white/60 leading-relaxed font-medium">
+                                    RoYout est né d'un constat simple : récupérer ses propres contenus ou des vidéos libres de droits devrait être une procédure rapide, fluide et sans fioritures. Conçu et développé par <b className="text-white">SERI TAGRO ROY</b>, cet outil est le fruit d'un travail passionné visant à offrir une alternative légère, performante et surtout accessible à tous.
                                 </p>
-                                <div className="pt-8 border-t border-white/5 flex flex-col gap-4">
-                                    <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-                                        <span className="text-white/20">Développeur</span>
-                                        <span className="text-red-500">SERI TAGRO ROY</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-                                        <span className="text-white/20">Moteur</span>
-                                        <span className="text-white/60">yt-dlp Core</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-                                        <span className="text-white/20">Interface</span>
-                                        <span className="text-white/60">React + Vite + Tailwind</span>
+                            </section>
+
+                            {/* Performance & Polyvalence */}
+                            <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="p-10 bg-white/[0.02] rounded-[40px] border border-white/5 space-y-8">
+                                    <h3 className="text-2xl font-black text-white uppercase tracking-widest">Performance & Polyvalence</h3>
+                                    <p className="text-sm text-white/40">Sous le capot, RoYout utilise des algorithmes optimisés pour garantir une flexibilité maximale :</p>
+                                    <div className="space-y-4">
+                                        {[
+                                            { label: "Haute Résolution", desc: "Support complet de la 4K, 1080p et 720p" },
+                                            { label: "Formats Vidéo", desc: "Exportation native en MP4 et WebM" },
+                                            { label: "Extraction Audio", desc: "Conversion ultra-rapide en MP3 (320 kbps)" },
+                                            { label: "Gestion Intelligente", desc: "Fusion automatique des flux audio/vidéo" }
+                                        ].map((item, i) => (
+                                            <div key={i} className="flex items-center gap-4 group">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-red-600"></div>
+                                                <div>
+                                                    <p className="text-[10px] font-black text-white uppercase tracking-wider">{item.label}</p>
+                                                    <p className="text-[10px] text-white/30">{item.desc}</p>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                            </div>
-                            <div className="p-12 bg-white/[0.02] rounded-[40px] border border-white/5 space-y-8">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500">Vision du Projet</h4>
-                                <p className="text-sm text-white/40 leading-relaxed">
-                                    RoYout n'est pas qu'un simple téléchargeur. C'est une plateforme d'archivage personnel qui respecte votre temps et votre matériel. Chaque ligne de code a été optimisée pour garantir une vitesse de traitement maximale tout en conservant une interface fluide et immersive.
+
+                                <div className="p-10 bg-white/[0.02] rounded-[40px] border border-white/5 space-y-8">
+                                    <h3 className="text-2xl font-black text-white uppercase tracking-widest">100% Gratuit</h3>
+                                    <p className="text-sm text-white/40">L'une des valeurs fondamentales de RoYout est l'accessibilité :</p>
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-6 p-4 rounded-2xl bg-white/[0.01]">
+                                            <i className="fas fa-check-circle text-green-500"></i>
+                                            <span className="text-xs font-bold text-white/60">Pas d'abonnement caché</span>
+                                        </div>
+                                        <div className="flex items-center gap-6 p-4 rounded-2xl bg-white/[0.01]">
+                                            <i className="fas fa-check-circle text-green-500"></i>
+                                            <span className="text-xs font-bold text-white/60">Pas de fonctionnalités limitées</span>
+                                        </div>
+                                        <div className="flex items-center gap-6 p-4 rounded-2xl bg-white/[0.01]">
+                                            <i className="fas fa-check-circle text-green-500"></i>
+                                            <span className="text-xs font-bold text-white/60">Pas de publicités intrusives</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Engagement Responsable */}
+                            <section className="p-12 bg-red-600/5 rounded-[40px] border border-red-600/10 space-y-6">
+                                <h3 className="text-2xl font-black text-red-500 uppercase tracking-widest">Engagement Responsable</h3>
+                                <p className="text-sm text-white/40 leading-relaxed italic">
+                                    Le respect des créateurs est essentiel. RoYout est un outil technique destiné à un usage personnel et privé. Nous encourageons nos utilisateurs à respecter les droits d'auteur et les conditions d'utilisation des plateformes.
                                 </p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/5 text-center">
-                                        <p className="text-2xl font-black text-white">4K</p>
-                                        <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-1">Ultra HD</p>
-                                    </div>
-                                    <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/5 text-center">
-                                        <p className="text-2xl font-black text-white">∞</p>
-                                        <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-1">Illimité</p>
-                                    </div>
-                                </div>
-                            </div>
+                            </section>
                         </div>
                     </div>
                 );
