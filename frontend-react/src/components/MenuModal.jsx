@@ -41,7 +41,8 @@ const MenuModal = ({ isOpen, onClose }) => {
         { id: 'about', icon: 'fa-info-circle', title: 'À propos de RoYout', color: 'bg-blue-500', desc: "L'histoire et la technologie derrière le projet" },
         { id: 'faq', icon: 'fa-question-circle', title: 'FAQ & Aide', color: 'bg-green-500', desc: "Questions fréquentes et assistance technique" },
         { id: 'support', icon: 'fa-heart', title: 'Soutenir le Projet', color: 'bg-red-500', desc: "Faire un don au développeur (Local & Int)" },
-        { id: 'updates', icon: 'fa-sync', title: 'Vérifier les Mises à jour', color: 'bg-orange-500', desc: "Lancer la recherche de version sur le serveur", action: () => callApi('check_for_updates') },
+        { id: 'updates', icon: 'fa-sync', title: 'Mise à jour App', color: 'bg-orange-500', desc: "Vérifier si une nouvelle version de RoYout est disponible", action: () => callApi('check_for_updates') },
+        { id: 'update_engine', icon: 'fa-bolt', title: 'Mise à jour Moteur', color: 'bg-green-600', desc: "Forcer la mise à jour de yt-dlp (moteur de téléchargement)", action: () => callApi('update_engine') },
         { id: 'website', icon: 'fa-globe', title: 'Site Officiel', color: 'bg-blue-600', desc: "Visiter royout.vercel.app", action: () => callApi('open_external_link', 'https://royout.vercel.app/') },
         { id: 'integration', icon: 'fa-desktop', title: 'Intégration Windows', color: 'bg-indigo-500', desc: "Ajouter RoYout au menu clic droit des dossiers", action: () => callApi('install_context_menu') },
         { id: 'fullscreen', icon: 'fa-expand-arrows-alt', title: 'Mode Immersion', color: 'bg-teal-500', desc: "Basculer la fenêtre en plein écran", action: () => callApi('toggle_fullscreen') },
@@ -319,14 +320,17 @@ const MenuModal = ({ isOpen, onClose }) => {
                                 </button>
 
                                 <button 
-                                    onClick={() => callApi('_check_updates_ytdlp')}
+                                    onClick={() => callApi('update_engine')}
                                     className="p-8 bg-white/[0.02] border border-white/5 rounded-[40px] flex items-center gap-6 hover:bg-white/[0.05] hover:border-white/10 transition-all group text-left"
                                 >
                                     <div className="w-16 h-16 rounded-2xl bg-green-600/10 flex items-center justify-center text-green-500 group-hover:scale-110 transition-transform">
                                         <i className="fas fa-bolt"></i>
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-white uppercase tracking-widest">Moteur (yt-dlp)</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest">Moteur (yt-dlp)</p>
+                                            <span className="text-[7px] bg-green-500/20 text-green-500 px-2 py-0.5 rounded-full font-black uppercase">Recommandé</span>
+                                        </div>
                                         <p className="text-[10px] text-white/30">Forcer la mise à jour du moteur</p>
                                     </div>
                                 </button>

@@ -454,7 +454,11 @@ class Api:
                 "count": len(self.download_queue)
             }
 
-    def _check_updates_ytdlp(self):
+    def update_engine(self):
+        threading.Thread(target=self._run_engine_update, daemon=True).start()
+        return True
+
+    def _run_engine_update(self):
         try:
             import subprocess
             # Sur Windows, on utilise STARTUPINFO pour cacher totalement la fenêtre CMD de pip
