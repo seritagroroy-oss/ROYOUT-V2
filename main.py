@@ -92,8 +92,8 @@ class Api:
         self._init_settings()
         self._log(f"--- Démarrage de RoYout v{self.VERSION} ---")
         
-        # Tâches de fond (Réactivées après stabilisation)
-        threading.Thread(target=self._run_engine_update, daemon=True).start()
+        # Tâches de fond (Silencieuses au démarrage)
+        threading.Thread(target=self._run_engine_update, args=(True,), daemon=True).start()
         threading.Thread(target=self._check_app_version, daemon=True).start()
         threading.Thread(target=self._check_ffmpeg, daemon=True).start()
         # threading.Thread(target=self._clipboard_monitor, daemon=True).start()
@@ -455,11 +455,13 @@ class Api:
             }
 
     def update_engine(self):
-        threading.Thread(target=self._run_engine_update, daemon=True).start()
+        # Manuel -> non silencieux
+        threading.Thread(target=self._run_engine_update, args=(False,), daemon=True).start()
         return True
 
-    def _run_engine_update(self):
+    def _run_engine_update(self, silent=False):
         try:
+            if not silent: self._notify("Maintenance", "Mise à jour du moteur en cours... veuillez patienter.")
             import subprocess
             # Sur Windows, on utilise STARTUPINFO pour cacher totalement la fenêtre CMD de pip
             si = None
@@ -468,10 +470,18 @@ class Api:
                 si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 si.wShowWindow = 0 # SW_HIDE
 
-            subprocess.run([sys.executable, "-m", "pip", "install", "-U", "yt-dlp"], 
+            res = subprocess.run([sys.executable, "-m", "pip", "install", "-U", "yt-dlp"], 
                            capture_output=True, startupinfo=si, timeout=120)
+            
+            if not silent:
+                if res.returncode == 0:
+                    self._notify("Succès", "Le moteur de téléchargement est à jour !")
+                else:
+                    self._notify("Erreur", "La mise à jour du moteur a échoué.")
+                
             self._log("Vérification yt-dlp terminée.")
         except Exception as e: 
+            if not silent: self._notify("Erreur", "Impossible de mettre à jour le moteur.")
             self._log(f"Erreur update yt-dlp : {e}")
 
     def _notify(self, title, message):
