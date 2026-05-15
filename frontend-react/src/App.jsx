@@ -147,7 +147,7 @@ function App() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 3.2 }}
           >
-            <SearchSection onAnalyze={handleAnalyze} />
+            <SearchSection onAnalyze={handleAnalyze} onSearch={handleSearch} />
           </motion.div>
 
           <section className="mt-8">

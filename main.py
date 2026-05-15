@@ -619,6 +619,11 @@ class Api:
         try:
             self._log(f"Analyse de l'URL : {url}")
             # Options robustes pour l'extraction
+            # Détection intelligente : si c'est un lien watch?v= avec un &list=, 
+            # on force l'analyse de la vidéo seule SAUF si l'utilisateur a cliqué sur une playlist explicitement.
+            # Dans le doute, on laisse yt-dlp décider mais on ajoute une sécurité.
+            is_playlist_url = 'list=' in url and 'watch?v=' not in url
+            
             ydl_opts = {
                 'quiet': True, 
                 'no_warnings': True, 
@@ -626,8 +631,10 @@ class Api:
                 'cachedir': False,
                 'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                 'referer': 'https://www.youtube.com/',
-                'socket_timeout': 30, # Augmentation du timeout pour les connexions lentes
-                'ignore_no_formats_error': True
+                'socket_timeout': 30,
+                'ignore_no_formats_error': True,
+                'noplaylist': not is_playlist_url, # On ne charge la playlist que si c'est un lien playlist pur
+                'extract_flat': 'in_playlist' if is_playlist_url else False
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:

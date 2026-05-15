@@ -2,14 +2,19 @@ import React, { useState } from 'react';
 import { useAppState } from '../context/AppContext';
 import { useApi } from '../hooks/useApi';
 
-const SearchSection = ({ onAnalyze }) => {
+const SearchSection = ({ onAnalyze, onSearch }) => {
     const [query, setQuery] = useState('');
     const { setIsLoading, isLoading } = useAppState();
     const { callApi } = useApi();
 
-    const handleAnalyze = () => {
+    const handleAction = () => {
         if (!query.trim()) return;
-        onAnalyze(query);
+        const q = query.trim();
+        if (q.includes('youtube.com/') || q.includes('youtu.be/')) {
+            onAnalyze(q);
+        } else {
+            onSearch(q);
+        }
     };
 
     return (
@@ -25,14 +30,14 @@ const SearchSection = ({ onAnalyze }) => {
                         type="text" 
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        onKeyUp={(e) => e.key === 'Enter' && handleAnalyze()}
+                        onKeyUp={(e) => e.key === 'Enter' && handleAction()}
                         placeholder="Collez un lien YouTube ou faites une recherche..." 
                         className="w-full bg-transparent p-5 pl-14 rounded-2xl outline-none text-lg placeholder:text-white/10 font-medium tracking-tight text-white"
                     />
                 </div>
                 
                 <button 
-                    onClick={handleAnalyze}
+                    onClick={handleAction}
                     disabled={isLoading}
                     className="
                         bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 
