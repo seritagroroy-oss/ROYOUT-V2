@@ -26,7 +26,7 @@ window.showToast = (msg) => {
 
 function App() {
   const { isReady, callApi } = useApi();
-  const { setIsLoading, isLoading } = useAppState();
+  const { setIsLoading, isLoading, favorites, toggleFavorite } = useAppState();
   
   // États de recherche
   const [searchResults, setSearchResults] = useState([]);
@@ -176,40 +176,55 @@ function App() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               <AnimatePresence mode='popLayout'>
-                {searchResults.map((video, index) => (
-                  <motion.div
-                    key={video.url + index}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.4, delay: 0.1 }}
-                    onClick={() => handleAnalyze(video.url)}
-                    className="group cursor-pointer flex flex-col gap-4 p-4 rounded-[32px] bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-red-500/30 transition-all duration-500"
-                  >
-                    <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl">
-                      <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                      <div className="absolute top-3 left-3 px-2.5 py-1 bg-red-600/90 backdrop-blur-md rounded-lg text-[9px] font-black text-white border border-white/20 shadow-xl uppercase">
-                        {video.type === 'playlist' ? 'PLAYLIST' : 'HD'}
-                      </div>
-                      <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/80 backdrop-blur-md rounded-lg text-[10px] font-black text-white border border-white/10">
-                        {video.duration}
-                      </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform scale-50 group-hover:scale-100 transition-transform">
-                          <i className="fas fa-play ml-1"></i>
+                {searchResults.map((video, index) => {
+                  const isFavorite = favorites.some(f => f.url === video.url);
+                  return (
+                    <motion.div
+                      key={video.url + index}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.4, delay: 0.1 }}
+                      onClick={() => handleAnalyze(video.url)}
+                      className="group cursor-pointer flex flex-col gap-4 p-4 rounded-[32px] bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-red-500/30 transition-all duration-500 relative"
+                    >
+                      <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl">
+                        <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        
+                        {/* Bouton Favoris Rapide */}
+                        <button 
+                          onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(video);
+                          }}
+                          className={`absolute top-3 right-3 w-8 h-8 rounded-xl backdrop-blur-md flex items-center justify-center transition-all z-10 border ${isFavorite ? 'bg-red-600 border-red-400 text-white shadow-lg shadow-red-600/40' : 'bg-black/60 border-white/10 text-white/40 hover:text-red-500 hover:scale-110'}`}
+                        >
+                          <i className={`${isFavorite ? 'fas' : 'far'} fa-heart text-[10px]`}></i>
+                        </button>
+
+                        <div className="absolute top-3 left-3 px-2.5 py-1 bg-red-600/90 backdrop-blur-md rounded-lg text-[9px] font-black text-white border border-white/20 shadow-xl uppercase">
+                          {video.type === 'playlist' ? 'PLAYLIST' : 'HD'}
+                        </div>
+                        <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/80 backdrop-blur-md rounded-lg text-[10px] font-black text-white border border-white/10">
+                          {video.duration}
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform scale-50 group-hover:scale-100 transition-transform">
+                            <i className="fas fa-play ml-1"></i>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="px-2">
-                      <h3 className="text-[14px] font-bold text-white line-clamp-2 leading-snug group-hover:text-red-500 transition-colors">{video.title}</h3>
-                      <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-2 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
-                        {video.uploader}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div className="px-2">
+                        <h3 className="text-[14px] font-bold text-white line-clamp-2 leading-snug group-hover:text-red-500 transition-colors">{video.title}</h3>
+                        <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-2 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                          {video.uploader}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
 
