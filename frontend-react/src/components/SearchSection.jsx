@@ -20,7 +20,7 @@ const SearchSection = ({ onAnalyze, onSearch }) => {
     return (
         <div className="w-full max-w-5xl mx-auto py-12">
             <div className={`
-                flex gap-3 p-2 bg-[var(--theme-card)] border border-[var(--theme-border)] rounded-[32px] backdrop-blur-xl 
+                search-bar-container flex gap-3 p-2 bg-[var(--theme-card)] border border-[var(--theme-border)] rounded-[32px] backdrop-blur-xl 
                 transition-all duration-500 group focus-within:border-red-500/30 focus-within:bg-[var(--theme-card-hover)]
                 shadow-[var(--theme-shadow)]
                 ${isLoading ? 'opacity-50 pointer-events-none' : ''}

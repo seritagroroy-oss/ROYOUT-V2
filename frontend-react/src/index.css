@@ -81,6 +81,22 @@
   color: #dc2626 !important;
 }
 
+/* Barre de recherche Noir Premium en mode clair */
+.light-mode .search-bar-container {
+  background: #000000 !important;
+  border-color: #333333 !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2) !important;
+}
+.light-mode .search-bar-container input {
+  color: white !important;
+}
+.light-mode .search-bar-container i.fa-link {
+  color: rgba(255,255,255,0.4) !important;
+}
+.light-mode .search-bar-container i.fa-link.text-red-500 {
+  color: #ef4444 !important;
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;
