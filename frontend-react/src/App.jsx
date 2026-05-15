@@ -70,6 +70,7 @@ function App() {
       const targetColor = bgColors[themeId] || '#0f0f0f';
       document.body.style.backgroundColor = targetColor;
       document.documentElement.style.backgroundColor = targetColor;
+      document.documentElement.style.setProperty('--theme-bg', targetColor);
       if (themeId === 'light' || themeId === 'soft') document.documentElement.classList.add('light-mode');
       else document.documentElement.classList.remove('light-mode');
     };

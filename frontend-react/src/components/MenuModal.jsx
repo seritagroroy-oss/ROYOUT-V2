@@ -68,7 +68,7 @@ const MenuModal = ({ isOpen, onClose }) => {
             case 'about':
                 return (
                     <div className="flex flex-col gap-10 animate-in fade-in duration-500 max-h-[80vh] overflow-y-auto pr-4 custom-scrollbar">
-                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 bg-[#0f0f0f] z-10 py-4">
+                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 z-10 py-4" style={{ backgroundColor: 'var(--theme-bg, #0f0f0f)' }}>
                             <i className="fas fa-arrow-left"></i> Retour
                         </button>
                         

@@ -33,9 +33,10 @@ const Modal = ({ isOpen, onClose, title, children, fullScreen = false, maxWidth 
                     >
                         <div 
                             className={`
-                                w-full flex flex-col pointer-events-auto overflow-hidden bg-[#0f0f0f]
+                                w-full flex flex-col pointer-events-auto overflow-hidden
                                 ${fullScreen ? 'h-full' : `${maxWidth} max-h-[85vh] border border-white/10 rounded-[40px] shadow-2xl`}
                             `}
+                            style={{ backgroundColor: 'var(--theme-bg, #0f0f0f)' }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Header */}
