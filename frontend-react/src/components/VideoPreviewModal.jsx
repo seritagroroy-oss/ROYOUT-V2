@@ -9,6 +9,10 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
     const [metadata, setMetadata] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedFormat, setSelectedFormat] = useState(null);
+    const [selectedLanguage, setSelectedLanguage] = useState(null);
+    const [withSubtitles, setWithSubtitles] = useState(false);
+    const [trimStart, setTrimStart] = useState('');
+    const [trimEnd, setTrimEnd] = useState('');
     const [error, setError] = useState(null);
     
     const isFavorite = favorites?.some(f => f.url === videoUrl) || false;
@@ -19,6 +23,10 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
         } else {
             setMetadata(null);
             setError(null);
+            setSelectedLanguage(null);
+            setWithSubtitles(false);
+            setTrimStart('');
+            setTrimEnd('');
         }
     }, [isOpen, videoUrl]);
 
@@ -35,6 +43,10 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
                 } else if (res.status === 'playlist') {
                     setSelectedFormat('mp3_320'); // Par défaut pour playlist
                 }
+                // Langue par défaut si disponible
+                if (res.languages && res.languages.length > 0) {
+                    setSelectedLanguage(res.languages[0].id);
+                }
             } else {
                 setError(res?.message || "Impossible de charger les informations de la vidéo.");
             }
@@ -47,6 +59,13 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
 
     const handleDownload = async () => {
         if (!selectedFormat) return;
+        
+        const options = {
+            subtitles: withSubtitles,
+            trim_start: trimStart,
+            trim_end: trimEnd
+        };
+
         if (metadata.status === 'playlist') {
             const res = await callApi('download_playlist', metadata.entries, selectedFormat, "");
             if (res.status === 'success') {
@@ -54,7 +73,7 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
                 else onClose();
             }
         } else {
-            const res = await callApi('download_video', videoUrl, selectedFormat, "");
+            const res = await callApi('download_video', videoUrl, selectedFormat, "", selectedLanguage, options);
             if (res.status === 'success') {
                 if (onDownloadStarted) onDownloadStarted();
                 else onClose();
@@ -204,9 +223,69 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
                     </div>
                 </div>
 
+                {/* SECTION LANGUE (Si dispo) */}
+                {metadata.languages && metadata.languages.length > 1 && (
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-4">
+                            <i className="fas fa-language text-purple-500"></i>
+                            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-white/40">Langue Audio</p>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            {metadata.languages.map(l => (
+                                <button 
+                                    key={l.id}
+                                    onClick={() => setSelectedLanguage(l.id)}
+                                    className={`px-6 py-3 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${selectedLanguage === l.id ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-600/30' : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'}`}
+                                >
+                                    {l.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* OPTIONS AVANCÉES */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 rounded-[40px] bg-white/[0.02] border border-white/5 shadow-inner">
+                    {/* Sous-titres */}
+                    <div className="space-y-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/20">Sous-titres</p>
+                        <button 
+                            onClick={() => setWithSubtitles(!withSubtitles)}
+                            className={`w-full p-4 rounded-2xl border flex items-center justify-between transition-all ${withSubtitles ? 'bg-teal-600/10 border-teal-500/50 text-teal-500' : 'bg-white/5 border-white/5 text-white/20'}`}
+                        >
+                            <span className="text-[10px] font-black uppercase tracking-widest">Inclure les ST</span>
+                            <div className={`w-10 h-5 rounded-full relative transition-all ${withSubtitles ? 'bg-teal-500' : 'bg-white/10'}`}>
+                                <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${withSubtitles ? 'right-1' : 'left-1'}`}></div>
+                            </div>
+                        </button>
+                    </div>
+
+                    {/* Découpage */}
+                    <div className="space-y-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/20">Découpage (Trim)</p>
+                        <div className="flex items-center gap-2">
+                            <input 
+                                type="text" 
+                                placeholder="00:00"
+                                value={trimStart}
+                                onChange={(e) => setTrimStart(e.target.value)}
+                                className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-[10px] font-black text-white focus:border-red-600 outline-none transition-all"
+                            />
+                            <span className="text-white/20 text-xs">à</span>
+                            <input 
+                                type="text" 
+                                placeholder="Fin"
+                                value={trimEnd}
+                                onChange={(e) => setTrimEnd(e.target.value)}
+                                className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-[10px] font-black text-white focus:border-red-600 outline-none transition-all"
+                            />
+                        </div>
+                    </div>
+                </div>
+
                 <button 
                     onClick={handleDownload}
-                    className="w-full bg-white text-black py-7 rounded-[32px] font-black text-sm uppercase tracking-[0.3em] transition-all hover:bg-red-600 hover:text-white shadow-2xl active:scale-95 mt-auto border-4 border-transparent hover:border-white/20"
+                    className="w-full bg-white text-black py-7 rounded-[32px] font-black text-sm uppercase tracking-[0.3em] transition-all hover:bg-red-600 hover:text-white shadow-2xl active:scale-95 border-4 border-transparent hover:border-white/20"
                 >
                     Démarrer le téléchargement
                 </button>
