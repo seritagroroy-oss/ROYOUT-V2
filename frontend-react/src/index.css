@@ -19,8 +19,9 @@
   --theme-card: rgba(255, 255, 255, 0.02);
   --theme-card-hover: rgba(255, 255, 255, 0.05);
   --theme-border: rgba(255, 255, 255, 0.05);
-  --theme-accent: #dc2626; /* Red-600 */
-  --theme-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  --theme-accent: #ff0000;
+  --theme-accent-glow: rgba(255, 0, 0, 0.1);
+  --theme-shadow: 0 10px 30px rgba(0,0,0,0.3);
   
   background-color: var(--theme-bg);
   color: var(--theme-text);
@@ -31,11 +32,11 @@
 
 .light-mode {
   --theme-text: #1a1a1a;
-  --theme-text-dim: #555555;
-  --theme-card: #f5f5f5;
-  --theme-card-hover: #eeeeee;
-  --theme-border: #dddddd;
-  --theme-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  --theme-text-dim: #666666;
+  --theme-card: #ffffff;
+  --theme-card-hover: #f0f0f0;
+  --theme-border: #e0e0e0;
+  --theme-shadow: 0 15px 50px rgba(0,0,0,0.12);
 }
 
 /* Adaptateur ciblé pour les fonds de cartes et surfaces claires */
@@ -47,25 +48,65 @@
 .light-mode h3.text-white,
 .light-mode h4.text-white,
 .light-mode p.text-white,
-.light-mode span.text-white {
+.light-mode p.text-white\/60,
+.light-mode p.text-white\/40,
+.light-mode span.text-white,
+.light-mode div.text-white {
   color: var(--theme-text) !important;
 }
 
 .light-mode .text-white\/20,
+.light-mode .text-white\/30,
 .light-mode .text-white\/40,
 .light-mode .text-white\/60 {
   color: var(--theme-text-dim) !important;
 }
 
+/* Correction des surfaces semi-transparentes blanches en mode clair */
+.light-mode .bg-white\/\[0\.02\],
+.light-mode .bg-white\/\[0\.01\],
+.light-mode .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.light-mode .border-white\/5,
+.light-mode .border-white\/10,
+.light-mode .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
 .light-mode .ambiance-glow {
-  opacity: 0.1;
-  filter: blur(250px);
+  opacity: 0.15;
+  filter: blur(300px);
+}
+
+/* Correction de l'anneau tournant du logo en mode clair */
+.light-mode .animate-spin-slow {
+  opacity: 1 !important;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.2);
+}
+
+/* Correction du glow du Splash Screen en mode clair */
+.light-mode .fixed.inset-0 .bg-red-600\/20 {
+  background-color: rgba(220, 38, 38, 0.15) !important;
+  filter: blur(80px) !important;
+}
+
+/* Optimisation du Placeholder en mode clair */
+.light-mode .search-bar-container input::placeholder {
+  color: #555555 !important;
+  opacity: 0.6 !important;
+}
+
+.light-mode .fixed.inset-0 .text-white\/30 {
+  color: #888888 !important;
 }
 
 /* Style spécial pour le bouton Load More en mode clair */
 .light-mode .btn-load-more {
   background: #dc2626 !important;
-  border-color: #ef4444 !important;
+  border-color: #dc2626 !important;
 }
 .light-mode .btn-load-more span, 
 .light-mode .btn-load-more i {
@@ -81,20 +122,14 @@
   color: #dc2626 !important;
 }
 
-/* Optimisation du Placeholder en mode clair */
-.light-mode .search-bar-container input::placeholder {
-  color: #888888 !important;
-  opacity: 1 !important;
-}
-.light-mode .search-bar-container i.fa-link {
-  color: #aaaaaa !important;
-}
-
 /* Badges Vidéo en mode clair */
 .light-mode .badge-duration {
   background: #dc2626 !important;
+  color: white !important;
   border-color: #ef4444 !important;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
 }
+
 .light-mode .badge-type {
   background: white !important;
   color: #dc2626 !important;
@@ -116,5 +151,61 @@ html, body, #root {
 }
 
 /* Utilitaires de drag pour pywebview */
+
 .drag-area { -webkit-app-region: drag; }
 .no-drag { -webkit-app-region: no-drag; }
+
+/* Hover Preview System - React Version */
+.preview-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff0000, #ff4d00);
+  width: 0%;
+  z-index: 50;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  transition: width 0.1s linear;
+}
+
+.preview-tooltip {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 16px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 800;
+  color: white;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 100;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 20px rgba(220, 38, 38, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.video-card-parent:hover .preview-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.tooltip-tag {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.light-mode .preview-tooltip {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a1a;
+  border-color: rgba(0, 0, 0, 0.1);
+}

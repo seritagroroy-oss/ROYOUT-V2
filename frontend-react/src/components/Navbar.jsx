@@ -45,7 +45,7 @@ const Navbar = ({ onOpenHistory, onOpenFavorites, onOpenQueue, onOpenMenu, immer
 
                 {/* Logo avec effet spin */}
                 <div className="relative ml-2">
-                    <div className="absolute -inset-1 rounded-full border border-red-500/30 animate-spin-slow opacity-50"></div>
+                    <div className="absolute -inset-1.5 rounded-full border-2 border-transparent border-t-red-600 border-r-red-600 animate-spin-slow opacity-80 shadow-[0_0_10px_rgba(220,38,38,0.3)]"></div>
                     <div className="relative w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-lg border border-white/10 overflow-hidden">
                         <img src="/logo.png" alt="R" className="w-5 h-5 rounded-full" />
                     </div>

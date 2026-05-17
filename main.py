@@ -96,10 +96,7 @@ class Api:
         threading.Thread(target=self._run_engine_update, args=(True,), daemon=True).start()
         threading.Thread(target=self._check_app_version, daemon=True).start()
         threading.Thread(target=self._check_ffmpeg, daemon=True).start()
-        # threading.Thread(target=self._clipboard_monitor, daemon=True).start()
         # self._warmup_ytdlp() # Désactivé pour la stabilité
-        self.monitor_clipboard = True
-        self.last_clipboard = ""
         self.scheduled_tasks = []
         self.ydl_search = None
         self.ydl_info = None
@@ -110,6 +107,8 @@ class Api:
         self._analyzing_urls = set()
         self._lock_analyzing = threading.Lock()
         self.current_search_id = 0
+        self.video_cache = {} # Cache intelligent pour les infos vidéos
+        self.cache_lock = threading.Lock()
 
     def schedule_download(self, url, format_id, folder, delay_seconds, language=None):
         """Planifie un téléchargement pour plus tard"""
@@ -207,42 +206,6 @@ class Api:
             self._log(f"Erreur intégration : {e}")
             return {"status": "error", "message": "Échec de l'intégration."}
 
-    def _clipboard_monitor(self):
-        """Surveille le presse-papiers pour détecter des liens YouTube (Version stable Windows)"""
-        if sys.platform != 'win32': return
-        
-        self._log("Surveillance du presse-papiers (Native) activée.")
-        import ctypes
-        from ctypes import wintypes
-
-        user32 = ctypes.windll.user32
-        kernel32 = ctypes.windll.kernel32
-        
-        while True:
-            try:
-                if not self.monitor_clipboard:
-                    time.sleep(2)
-                    continue
-                
-                # Accès natif au presse-papiers Windows pour éviter les crashs Tkinter
-                if user32.OpenClipboard(None):
-                    if user32.IsClipboardFormatAvailable(1): # 1 = CF_TEXT
-                        h_clip_mem = user32.GetClipboardData(1)
-                        if h_clip_mem:
-                            p_clip_mem = kernel32.GlobalLock(h_clip_mem)
-                            if p_clip_mem:
-                                text = ctypes.c_char_p(p_clip_mem).value.decode('utf-8', 'ignore')
-                                kernel32.GlobalUnlock(h_clip_mem)
-                                
-                                if text and text != self.last_clipboard and ("youtube.com/" in text or "youtu.be/" in text):
-                                    self.last_clipboard = text
-                                    self._log(f"Lien détecté : {text}")
-                                    if self._window:
-                                        self._window.evaluate_js(f"if(window.onClipboardLink) window.onClipboardLink('{text}');")
-                    user32.CloseClipboard()
-            except Exception:
-                pass
-            time.sleep(2)
 
     def _get_ydl_search_options(self):
         """Retourne les options de base pour la recherche"""
@@ -356,7 +319,7 @@ class Api:
         if not os.path.exists(self.settings_file):
             default_settings = {
                 "last_update_notification": 0,
-                "theme": "dark",
+                "theme": "light",
                 "font_size": 100,
                 "download_folder": os.path.join(os.path.expanduser("~"), "Downloads")
             }
@@ -396,6 +359,14 @@ class Api:
         if key == "download_folder":
             self.last_folder = value
         self._save_settings(s)
+        return True
+
+    def set_theme(self, theme_id):
+        """Définit et persiste le thème"""
+        self._log(f"Changement de thème : {theme_id}")
+        self.update_setting("theme", theme_id)
+        if self._window:
+            self._window.evaluate_js(f"if(window.applyTheme) window.applyTheme('{theme_id}');")
         return True
 
     def _log(self, message):
@@ -672,6 +643,18 @@ class Api:
             if url in self._analyzing_urls:
                 self._log(f"Analyse déjà en cours pour : {url}")
                 return {"status": "error", "message": "Analyse déjà en cours..."}
+            
+            # Vérification du cache (TTL de 1 heure)
+            with self.cache_lock:
+                if url in self.video_cache:
+                    cached = self.video_cache[url]
+                    if time.time() - cached['timestamp'] < 3600:
+                        self._log(f"Récupération du cache pour : {url}")
+                        # On met à jour last_metadata pour le téléchargement
+                        if cached['data'].get('status') == 'success':
+                            self.last_metadata = cached['data'].get('_internal_meta')
+                        return cached['data']
+            
             self._analyzing_urls.add(url)
 
         try:
@@ -762,15 +745,34 @@ class Api:
                     "info": info 
                 }
                 
-                self._log(f"Vidéo détectée : {info.get('title')} ({len(languages)} langues)")
-                return {
+                
+                result = {
                     "status": "success", 
                     "title": info.get('title', 'Video')[:60], 
                     "thumbnail": info.get('thumbnail', ''),
                     "duration": self._format_duration(info.get('duration')), 
                     "formats": formats,
-                    "languages": languages
+                    "languages": languages,
+                    "uploader": info.get('uploader', 'Chaîne inconnue'),
+                    "description": info.get('description', '')[:500] + "..."
                 }
+
+                # Mise en cache
+                with self.cache_lock:
+                    self.video_cache[url] = {
+                        'timestamp': time.time(),
+                        'data': result
+                    }
+                    # Sauvegarder l'objet complet en interne pour le téléchargement
+                    result['_internal_meta'] = {
+                        "title": info.get('title', 'Vidéo'), 
+                        "thumbnail": info.get('thumbnail', ''),
+                        "formats_map": {f['id']: f['label'] for f in formats},
+                        "info": info 
+                    }
+
+                self._log(f"Vidéo détectée : {info.get('title')} ({len(languages)} langues)")
+                return result
         except Exception as e:
             error_msg = str(e).lower()
             self._log(f"Erreur analyse URL : {e}")
@@ -913,11 +915,26 @@ class Api:
             
             if format_id.startswith('mp3_'):
                 quality = format_id.split('_')[1]
-                ydl_opts.update({'format': 'bestaudio/best', 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': quality},
-                                 {'key': 'EmbedThumbnail'}, {'key': 'FFmpegMetadata'}]})
+                ydl_opts.update({
+                    'format': 'bestaudio/best',
+                    'postprocessors': [
+                        {'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': quality},
+                        {'key': 'EmbedThumbnail'},
+                        {'key': 'FFmpegMetadata', 'add_metadata': True},
+                    ]
+                })
             else:
-                ydl_opts.update({'format': f"{format_id}+bestaudio/best", 'merge_output_format': 'mp4',
-                                 'postprocessors': [{'key': 'EmbedThumbnail'}, {'key': 'FFmpegMetadata'}]})
+                ydl_opts.update({
+                    'format': f"{format_id}+bestaudio/best",
+                    'merge_output_format': 'mp4',
+                    'postprocessors': [
+                        {'key': 'EmbedThumbnail'},
+                        {'key': 'FFmpegMetadata', 'add_metadata': True},
+                        {'key': 'FFmpegEmbedSubsetSubtitle'} if options.get('subtitles') else None
+                    ]
+                })
+                # Filtrer les None dans les postprocessors
+                ydl_opts['postprocessors'] = [p for p in ydl_opts['postprocessors'] if p]
             self._log(f"Démarrage téléchargement: {url}")
             with yt_dlp.YoutubeDL(ydl_opts) as ydl: ydl.download([url])
             meta = getattr(self, 'last_metadata', {})
@@ -959,6 +976,13 @@ class Api:
             
             # Options optimisées pour la vitesse de recherche
             search_opts = self._get_ydl_search_options()
+            
+            # Application des filtres de durée
+            if search_type == 'short':
+                search_opts['match_filter'] = lambda info, *, incomplete: None if info.get('duration') and info.get('duration') < 240 else 'Trop long'
+            elif search_type == 'long':
+                search_opts['match_filter'] = lambda info, *, incomplete: None if info.get('duration') and info.get('duration') > 1200 else 'Trop court'
+
             search_opts.update({
                 'playlist_items': f'{offset}-{offset+limit-1}', # ON NE CHARGE QUE LA TRANCHE VOULUE
                 'lazy_playlist': True, # Chargement paresseux pour l'instantanéité
@@ -969,7 +993,7 @@ class Api:
             
             def fetch_videos():
                 nonlocal video_results
-                if search_type in ['mixed', 'video']:
+                if search_type in ['mixed', 'video', 'short', 'long']:
                     try:
                         with yt_dlp.YoutubeDL(search_opts) as ydl:
                             # On force ytsearch à chercher assez de vidéos pour que playlist_items puisse piocher dedans
@@ -1004,12 +1028,13 @@ class Api:
                                     if not entry: continue
                                     thumb = entry.get('thumbnail')
                                     if not thumb and entry.get('thumbnails'): thumb = entry['thumbnails'][-1].get('url')
+                                    count = entry.get('video_count') or entry.get('playlist_count') or entry.get('n_entries') or entry.get('count') or '?'
                                     playlist_results.append({
                                         "type": "playlist",
                                         "url": entry.get('url') or f"https://www.youtube.com/playlist?list={entry.get('id')}",
                                         "title": entry.get('title', 'Playlist'),
                                         "thumbnail": thumb or '',
-                                        "duration": f"{entry.get('video_count', '?')} vidéos",
+                                        "duration": f"{count} vidéos",
                                         "uploader": entry.get('uploader', 'Playlist YouTube')
                                     })
                     except Exception as e:
@@ -1023,7 +1048,7 @@ class Api:
             
             # Fusion
             results = []
-            if search_type == 'video': results = video_results
+            if search_type in ['video', 'short', 'long']: results = video_results
             elif search_type == 'playlist': results = playlist_results
             else:
                 results = video_results
@@ -1079,8 +1104,106 @@ class Api:
             self._log(f"Erreur flux : {e}")
             return {"status": "error", "message": str(e)}
 
+    def get_ai_summary(self, url):
+        """Génère un résumé détaillé basé sur les métadonnées réelles de la vidéo"""
+        try:
+            self._log(f"Analyse IA approfondie pour : {url}")
+            
+            # Récupération des infos (depuis le cache ou extraction fraîche)
+            info = None
+            with self.cache_lock:
+                info = self.video_cache.get(url, {}).get('data', {}).get('_internal_meta', {}).get('info')
+            
+            if not info:
+                ydl_opts = {'quiet': True, 'skip_download': True}
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info = ydl.extract_info(url, download=False)
+            
+            title = info.get('title', 'Sans titre')
+            desc = info.get('description', '')
+            views = info.get('view_count', 0)
+            uploader = info.get('uploader', 'Inconnu')
+            tags = info.get('tags', [])[:5] # Prendre les 5 premiers tags
+            categories = info.get('categories', [])
+            duration = self._format_duration(info.get('duration'))
+
+            # Construction d'un résumé plus intelligent
+            summary_text = f"Cette vidéo de {uploader} intitulée '{title}' "
+            if views > 1000000:
+                summary_text += f"est un contenu viral avec plus de {views//1000000} millions de vues. "
+            else:
+                summary_text += f"a déjà captivé {views:,} spectateurs. "
+            
+            # Analyse de la description pour le résumé
+            lines = [l.strip() for l in desc.split('\n') if l.strip() and len(l.strip()) > 30]
+            summary_intro = f"Cette vidéo de {uploader} intitulée '{title}' "
+            
+            if views > 1000000:
+                summary_intro += f"est un contenu viral majeur avec plus de {views//1000000} millions de vues. "
+            else:
+                summary_intro += f"a déjà captivé une audience de {views:,} spectateurs. "
+
+            # On prend les 3 premières lignes pertinentes pour un résumé plus riche
+            detailed_summary = " ".join(lines[:3]) if lines else "Aucune description détaillée fournie."
+            
+            full_summary = f"{summary_intro} {detailed_summary}"
+
+            # Points clés dynamiques
+            points = []
+            
+            # 1. Infos générales
+            points.append(f"⏱️ Durée : {duration}")
+            points.append(f"👤 Créateur : {uploader}")
+            
+            # 2. Extraction des chapitres ou moments forts
+            import re
+            chapters = re.findall(r'(\d{1,2}:\d{2})\s+[-–]?\s+(.+)', desc)
+            if chapters:
+                points.append("📍 Moments clés détectés :")
+                for c in chapters[:5]:
+                    points.append(f"• {c[0]} : {c[1]}")
+            else:
+                # Fallback sur les tags ou thèmes
+                if tags:
+                    points.append("🏷️ Thématiques : " + ", ".join(tags))
+                if categories:
+                    points.append("📁 Catégorie : " + categories[0])
+
+            # 3. Analyse du ton (simulée mais basée sur les mots clés)
+            tone = "Informationnel"
+            if any(word in desc.lower() for word in ['tuto', 'how to', 'apprendre', 'guide']):
+                tone = "Éducatif / Tutoriel"
+                points.append("💡 Type : Guide détaillé pour apprendre")
+            elif any(word in desc.lower() for word in ['vlog', 'daily', 'vie']):
+                tone = "Personnel / Vlog"
+                points.append("🎥 Type : Expérience de vie partagée")
+            elif any(word in desc.lower() for word in ['funny', 'drole', 'humour', 'comedy']):
+                tone = "Divertissement / Humour"
+                points.append("🎭 Type : Contenu axé sur le divertissement")
+
+            points.append(f"🎭 Ton de la vidéo : {tone}")
+            
+            time.sleep(1.2) # Simulation de traitement
+            
+            return {
+                "status": "success", 
+                "summary": full_summary,
+                "points": points,
+                "metadata": {
+                    "views": views,
+                    "uploader": uploader,
+                    "date": info.get('upload_date'),
+                    "tone": tone
+                }
+            }
+        except Exception as e:
+            self._log(f"Erreur IA : {e}")
+            return {"status": "error", "message": "Impossible de générer le résumé pour le moment."}
+
 def start_app():
+    print("DEBUG: Entering start_app")
     api = Api()
+    print("DEBUG: Api() instantiated")
     
     # --- MIGRATION REACT ---
     # Désactivez DEV_MODE pour charger les fichiers locaux compilés
@@ -1096,12 +1219,16 @@ def start_app():
         else:
             # Fallback sur l'ancien dossier UI si React n'est pas compilé
             index_html = resource_path('ui/index.html')
+            
     # -----------------------
+
+    print(f"DEBUG: index_html = {index_html}")
+    print(f"DEBUG: exists = {os.path.exists(index_html)}")
 
     window = webview.create_window("RoYout (React Edition)", index_html, js_api=api, width=1200, height=850, background_color='#0f0f0f', frameless=False)
     api.set_window(window)
     # On lance le tray avec un petit délai pour laisser l'interface s'initialiser
-    # threading.Timer(2.0, lambda: setup_tray(window)).start()
+    threading.Timer(2.0, lambda: setup_tray(window)).start()
     icon_path = resource_path('ui/favicon.ico')
     if not os.path.exists(icon_path):
         icon_path = None

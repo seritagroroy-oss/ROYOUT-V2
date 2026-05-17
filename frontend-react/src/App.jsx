@@ -11,6 +11,8 @@ import UpdateModal from './components/UpdateModal'
 import SplashScreen from './components/SplashScreen'
 import { useAppState } from './context/AppContext'
 import { useApi } from './hooks/useApi'
+import { VideoSkeleton } from './components/Skeleton'
+import VideoCard from './components/VideoCard'
 
 // --- BRANCHEMENTS GLOBAUX ---
 window.showToast = (msg) => {
@@ -48,6 +50,34 @@ function App() {
   
   const [updateVersion, setUpdateVersion] = useState('0.0.0');
   const [activeVideoUrl, setActiveVideoUrl] = useState(null);
+  const [miniPlayerVideo, setMiniPlayerVideo] = useState(null);
+
+  const MiniPlayer = ({ video, onClose }) => {
+    const { callApi } = useApi();
+    const [streamUrl, setStreamUrl] = useState(null);
+
+    useEffect(() => {
+      const getUrl = async () => {
+        const res = await callApi('get_stream_url', video.url);
+        if (res && res.status === 'success') setStreamUrl(res.url);
+      };
+      getUrl();
+    }, [video.url]);
+
+    if (!streamUrl) return null;
+
+    return (
+      <div className="fixed bottom-10 right-10 w-96 aspect-video bg-black rounded-[32px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 z-[1000] group animate-in slide-in-from-right-10 duration-500">
+        <video src={streamUrl} autoPlay controls className="w-full h-full object-cover" />
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+        >
+          <i className="fas fa-times text-xs"></i>
+        </button>
+      </div>
+    );
+  };
 
   useEffect(() => {
     window.setImmersionMode = (active) => setImmersionMode(active);
@@ -79,16 +109,43 @@ function App() {
       }
     };
 
+    window.updateAmbiantTheme = (imageUrl) => {
+      if (!imageUrl) return;
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = imageUrl;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 1;
+        canvas.height = 1;
+        ctx.drawImage(img, 0, 0, 1, 1);
+        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+        document.documentElement.style.setProperty('--theme-accent', `rgb(${r},${g},${b})`);
+        document.documentElement.style.setProperty('--theme-accent-glow', `rgba(${r},${g},${b}, 0.2)`);
+      };
+    };
+    window.onClipboardLink = (url) => {
+      window.showToast("Lien détecté dans le presse-papiers !");
+    };
+
     if (isReady) {
-      loadDiscovery("Musique", 1, false);
+      const init = async () => {
+        const settings = await callApi('get_all_settings');
+        if (settings && settings.theme) {
+          window.applyTheme(settings.theme);
+        }
+        loadDiscovery("Musique", 1, false);
+      }
+      init();
     }
   }, [isReady]);
 
-  const loadDiscovery = async (query, page = 1, append = false) => {
+  const loadDiscovery = async (query, page = 1, append = false, filter = 'mixed') => {
     setIsLoading(true);
     try {
       const startOffset = (page - 1) * 20 + 1;
-      const res = await callApi('search_videos', query, startOffset, 20, 0, 'mixed');
+      const res = await callApi('search_videos', query, startOffset, 20, 0, filter);
       if (res && res.status === 'success') {
         if (append) {
           setSearchResults(prev => [...prev, ...res.results]);
@@ -107,14 +164,14 @@ function App() {
   const handleLoadMore = () => {
     const nextPage = currentPage + 1;
     setCurrentPage(nextPage);
-    loadDiscovery(currentQuery, nextPage, true);
+    loadDiscovery(currentQuery, nextPage, true, 'mixed'); // Pour le load more on garde mixed ou on passe le current filter
   };
 
-  const handleSearch = (query) => {
+  const handleSearch = (query, filter = 'mixed') => {
     if (!query) return;
     setDiscoveryTitle(`Résultats pour : ${query}`);
     setCurrentQuery(query);
-    loadDiscovery(query, 1, false);
+    loadDiscovery(query, 1, false, filter);
   };
 
   const handleAnalyze = (query) => {
@@ -198,52 +255,19 @@ function App() {
                   if (!video) return null;
                   const isFavorite = favorites?.some(f => f.url === video.url) || false;
                   return (
-                    <motion.div
+                    <VideoCard 
                       key={video.url + index}
-                      layout
-                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.4, delay: 0.1 }}
+                      video={video}
+                      isFavorite={isFavorite}
+                      onToggleFavorite={toggleFavorite}
                       onClick={() => handleAnalyze(video.url)}
-                      className="group cursor-pointer flex flex-col gap-4 p-4 rounded-[32px] bg-[var(--theme-card)] border border-[var(--theme-border)] hover:bg-[var(--theme-card-hover)] hover:border-red-500/30 transition-all duration-500 relative shadow-[var(--theme-shadow)]"
-                    >
-                      <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl">
-                        <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                        
-                        {/* Bouton Favoris Rapide */}
-                        <button 
-                          onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFavorite(video);
-                          }}
-                          className={`absolute top-3 right-3 w-8 h-8 rounded-xl backdrop-blur-md flex items-center justify-center transition-all z-10 border ${isFavorite ? 'bg-red-600 border-red-400 text-white shadow-lg shadow-red-600/40' : 'bg-black/60 border-white/10 text-white/40 hover:text-red-500 hover:scale-110'}`}
-                        >
-                          <i className={`${isFavorite ? 'fas' : 'far'} fa-heart text-[10px]`}></i>
-                        </button>
-
-                        <div className="badge-type absolute top-3 left-3 px-2.5 py-1 bg-red-600/90 backdrop-blur-md rounded-lg text-[9px] font-black text-white border border-white/20 shadow-xl uppercase">
-                          {video.type === 'playlist' ? 'PLAYLIST' : 'HD'}
-                        </div>
-                        <div className="badge-duration absolute bottom-3 right-3 px-2 py-1 bg-black/80 backdrop-blur-md rounded-lg text-[10px] font-black text-white border border-white/10">
-                          {video.duration}
-                        </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform scale-50 group-hover:scale-100 transition-transform">
-                            <i className="fas fa-play ml-1"></i>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="px-2">
-                        <h3 className="text-[14px] font-bold text-[var(--theme-text)] line-clamp-2 leading-snug group-hover:text-red-500 transition-colors">{video.title}</h3>
-                        <p className="text-[10px] text-[var(--theme-text-dim)] font-black uppercase tracking-widest mt-2 flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
-                          {video.uploader}
-                        </p>
-                      </div>
-                    </motion.div>
+                    />
                   );
                 })}
+
+                {isLoading && searchResults.length === 0 && Array.from({ length: 8 }).map((_, i) => (
+                  <VideoSkeleton key={i} />
+                ))}
               </AnimatePresence>
             </div>
 
@@ -301,11 +325,28 @@ function App() {
         onClose={closeModals} 
         videoUrl={activeVideoUrl}
         onDownloadStarted={() => openExclusiveModal('queue')}
+        onMiniPlayer={(data) => {
+          setMiniPlayerVideo(data);
+          closeModals();
+        }}
       />
 
+      {miniPlayerVideo && (
+        <MiniPlayer 
+          video={miniPlayerVideo} 
+          onClose={() => setMiniPlayerVideo(null)} 
+        />
+      )}
+
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-600/5 blur-[150px] rounded-full animate-pulse ambiance-glow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/5 blur-[150px] rounded-full animate-pulse ambiance-glow" style={{ animationDelay: '2s' }}></div>
+        <div 
+          className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] blur-[150px] rounded-full animate-pulse ambiance-glow transition-colors duration-1000"
+          style={{ backgroundColor: 'var(--theme-accent-glow)' }}
+        ></div>
+        <div 
+          className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] blur-[150px] rounded-full animate-pulse ambiance-glow transition-colors duration-1000"
+          style={{ backgroundColor: 'var(--theme-accent-glow)', animationDelay: '2s' }}
+        ></div>
       </div>
     </div>
   )

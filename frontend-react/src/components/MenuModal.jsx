@@ -69,7 +69,7 @@ const MenuModal = ({ isOpen, onClose }) => {
             case 'about':
                 return (
                     <div className="flex flex-col gap-10 animate-in fade-in duration-500 max-h-[80vh] overflow-y-auto pr-4 custom-scrollbar">
-                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 z-10 py-4" style={{ backgroundColor: 'var(--theme-bg, #0f0f0f)' }}>
+                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 z-10 py-4" style={{ backgroundColor: 'var(--theme-bg)' }}>
                             <i className="fas fa-arrow-left"></i> Retour
                         </button>
                         
@@ -78,7 +78,7 @@ const MenuModal = ({ isOpen, onClose }) => {
                             <section className="p-12 bg-white/[0.02] rounded-[40px] border border-white/5 space-y-6">
                                 <h3 className="text-2xl font-black text-red-500 uppercase tracking-widest">La Genèse du Projet</h3>
                                 <p className="text-lg text-white/60 leading-relaxed font-medium">
-                                    RoYout est né d'un constat simple : récupérer ses propres contenus ou des vidéos libres de droits devrait être une procédure rapide, fluide et sans fioritures. Conçu et développé par <b className="text-white">SERI TAGRO ROY</b>, cet outil est le fruit d'un travail passionné visant à offrir une alternative légère, performante et surtout accessible à tous.
+                                    RoYout est né d'un constat simple : récupérer ses propres contenus ou des vidéos libres de droits devrait être une procédure rapide, fluide et sans fioritures. Conçu et développé par <b className="text-red-600">SERI TAGRO ROY</b>, cet outil est le fruit d'un travail passionné visant à offrir une alternative légère, performante et surtout accessible à tous.
                                 </p>
                             </section>
 
@@ -138,7 +138,7 @@ const MenuModal = ({ isOpen, onClose }) => {
             case 'faq':
                 return (
                     <div className="flex flex-col gap-10 animate-in fade-in duration-500 max-h-[80vh] overflow-y-auto pr-4 custom-scrollbar">
-                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 bg-[#0f0f0f] z-10 py-4">
+                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 z-10 py-4" style={{ backgroundColor: 'var(--theme-bg)' }}>
                             <i className="fas fa-arrow-left"></i> Retour
                         </button>
                         
@@ -173,7 +173,7 @@ const MenuModal = ({ isOpen, onClose }) => {
             case 'support':
                 return (
                     <div className="flex flex-col gap-10 animate-in fade-in duration-500 max-h-[80vh] overflow-y-auto pr-4 custom-scrollbar pb-20">
-                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 bg-[#0f0f0f] z-10 py-4">
+                        <button onClick={() => setView('main')} className="flex items-center gap-4 text-white/40 hover:text-white uppercase font-black text-xs tracking-widest transition-all sticky top-0 z-10 py-4" style={{ backgroundColor: 'var(--theme-bg)' }}>
                             <i className="fas fa-arrow-left"></i> Retour
                         </button>
                         
@@ -184,7 +184,7 @@ const MenuModal = ({ isOpen, onClose }) => {
                                 </div>
                                 <h3 className="text-4xl font-black text-white">Soutenir le projet RoYout</h3>
                                 <p className="text-white/40 leading-relaxed max-w-2xl mx-auto">
-                                    RoYout est un projet indépendant développé, maintenu et mis à jour bénévolement par <b className="text-white">SERI TAGRO ROY</b>. L'application restera toujours 100% gratuite et sans publicité.
+                                    RoYout est un projet indépendant développé, maintenu et mis à jour bénévolement par <b className="text-red-600">SERI TAGRO ROY</b>. L'application restera toujours 100% gratuite et sans publicité.
                                 </p>
                             </div>
 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Modal from './Modal';
 import { useAppState } from '../context/AppContext';
 import { useApi } from '../hooks/useApi';
 
-const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => {
+const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted, onMiniPlayer }) => {
     const { callApi } = useApi();
     const { toggleFavorite, favorites } = useAppState();
     const [metadata, setMetadata] = useState(null);
@@ -13,7 +14,12 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
     const [withSubtitles, setWithSubtitles] = useState(false);
     const [trimStart, setTrimStart] = useState('');
     const [trimEnd, setTrimEnd] = useState('');
+    const [aiSummary, setAiSummary] = useState(null);
+    const [isAiLoading, setIsAiLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [isPlayingInline, setIsPlayingInline] = useState(false);
+    const [inlineStreamUrl, setInlineStreamUrl] = useState(null);
+    const [isStreamLoading, setIsStreamLoading] = useState(false);
     
     const isFavorite = favorites?.some(f => f.url === videoUrl) || false;
 
@@ -27,8 +33,30 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
             setWithSubtitles(false);
             setTrimStart('');
             setTrimEnd('');
+            setAiSummary(null);
+            setIsAiLoading(false);
+            setIsPlayingInline(false);
+            setInlineStreamUrl(null);
         }
     }, [isOpen, videoUrl]);
+
+    const handlePlayInline = async () => {
+        if (inlineStreamUrl) {
+            setIsPlayingInline(true);
+            return;
+        }
+        
+        setIsStreamLoading(true);
+        try {
+            const res = await callApi('get_stream_url', videoUrl);
+            if (res && res.status === 'success') {
+                setInlineStreamUrl(res.url);
+                setIsPlayingInline(true);
+            }
+        } finally {
+            setIsStreamLoading(false);
+        }
+    };
 
     const analyze = async () => {
         setIsLoading(true);
@@ -46,6 +74,10 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
                 // Langue par défaut si disponible
                 if (res.languages && res.languages.length > 0) {
                     setSelectedLanguage(res.languages[0].id);
+                }
+                // Déclencher le thème ambiant
+                if (window.updateAmbiantTheme && res.thumbnail) {
+                    window.updateAmbiantTheme(res.thumbnail);
                 }
             } else {
                 setError(res?.message || "Impossible de charger les informations de la vidéo.");
@@ -78,6 +110,18 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
                 if (onDownloadStarted) onDownloadStarted();
                 else onClose();
             }
+        }
+    };
+
+    const loadAiSummary = async () => {
+        setIsAiLoading(true);
+        try {
+            const res = await callApi('get_ai_summary', videoUrl);
+            if (res && res.status === 'success') {
+                setAiSummary(res);
+            }
+        } finally {
+            setIsAiLoading(false);
         }
     };
 
@@ -141,11 +185,40 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             {/* Gauche: Preview */}
             <div className="flex flex-col gap-10">
-                <div className="relative aspect-video rounded-[48px] overflow-hidden shadow-2xl border border-[var(--theme-border)] group">
-                    <img src={metadata.thumbnail} className="w-full h-full object-cover" alt="" />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="w-24 h-24 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform scale-75 group-hover:scale-100 transition-transform">
-                            <i className="fas fa-play text-2xl ml-2"></i>
+                <div className="relative aspect-video rounded-[48px] overflow-hidden shadow-2xl border border-[var(--theme-border)] group bg-black">
+                    {!isPlayingInline ? (
+                        <>
+                            <img src={metadata.thumbnail} className="w-full h-full object-cover" alt="" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-all">
+                                <button 
+                                    onClick={handlePlayInline}
+                                    disabled={isStreamLoading}
+                                    className="w-24 h-24 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl transform scale-90 group-hover:scale-100 transition-transform disabled:opacity-50"
+                                >
+                                    {isStreamLoading ? (
+                                        <i className="fas fa-circle-notch fa-spin text-2xl"></i>
+                                    ) : (
+                                        <i className="fas fa-play text-2xl ml-2"></i>
+                                    )}
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <video 
+                            src={inlineStreamUrl} 
+                            autoPlay 
+                            controls 
+                            className="w-full h-full object-cover"
+                        />
+                    )}
+                    
+                    <div className="absolute top-6 right-6">
+                        <button 
+                            onClick={() => onMiniPlayer({ url: videoUrl, title: metadata.title, thumbnail: metadata.thumbnail })}
+                            className="bg-black/60 backdrop-blur-md px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white border border-white/10 hover:bg-red-600 transition-all opacity-0 group-hover:opacity-100"
+                        >
+                            <i className="fas fa-external-link-alt mr-2"></i>
+                            Mini-Lecteur
                         </button>
                     </div>
                 </div>
@@ -156,18 +229,61 @@ const VideoPreviewModal = ({ isOpen, onClose, videoUrl, onDownloadStarted }) => 
                             <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Créateur</p>
                             <p className="text-sm font-bold text-[var(--theme-text-dim)]">{metadata.uploader}</p>
                         </div>
-                        <button 
-                            onClick={() => toggleFavorite({
-                                url: videoUrl,
-                                title: metadata.title,
-                                thumbnail: metadata.thumbnail,
-                                duration: metadata.duration
-                            })}
-                            className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl transition-all border ${isFavorite ? 'bg-red-600 border-red-400 text-white shadow-lg shadow-red-600/20' : 'bg-[var(--theme-card-hover)] border-[var(--theme-border)] text-[var(--theme-text-dim)] hover:text-red-500'}`}
-                        >
-                            <i className={`${isFavorite ? 'fas' : 'far'} fa-heart`}></i>
-                        </button>
+                        <div className="flex gap-4">
+                            <button 
+                                onClick={loadAiSummary}
+                                disabled={isAiLoading}
+                                className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center text-xl shadow-lg shadow-indigo-600/20 hover:scale-105 transition-all"
+                            >
+                                {isAiLoading ? <i className="fas fa-spinner animate-spin"></i> : <i className="fas fa-magic"></i>}
+                            </button>
+                            <button 
+                                onClick={() => toggleFavorite({
+                                    url: videoUrl,
+                                    title: metadata.title,
+                                    thumbnail: metadata.thumbnail,
+                                    duration: metadata.duration
+                                })}
+                                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl transition-all border ${isFavorite ? 'bg-red-600 border-red-400 text-white shadow-lg shadow-red-600/20' : 'bg-[var(--theme-card-hover)] border-[var(--theme-border)] text-[var(--theme-text-dim)] hover:text-red-500'}`}
+                            >
+                                <i className={`${isFavorite ? 'fas' : 'far'} fa-heart`}></i>
+                            </button>
+                        </div>
                     </div>
+
+                    {/* Zone Résumé IA */}
+                    <AnimatePresence>
+                        {aiSummary && (
+                            <motion.div 
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                className="p-8 rounded-[32px] bg-indigo-600/5 border border-indigo-500/20 space-y-6"
+                            >
+                                <div className="flex items-center gap-4 text-indigo-500">
+                                    <i className="fas fa-sparkles"></i>
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em]">Résumé Intelligent RoYout</h4>
+                                </div>
+                                <p className="text-sm text-[var(--theme-text)] leading-relaxed italic opacity-80">
+                                    "{aiSummary.summary}"
+                                </p>
+                                {aiSummary.metadata && (
+                                    <div className="flex flex-wrap gap-4 text-[9px] font-black uppercase tracking-widest text-indigo-400/60 border-t border-indigo-500/10 pt-4">
+                                        <span className="flex items-center gap-2"><i className="fas fa-eye text-[8px]"></i> {aiSummary.metadata.views.toLocaleString()} VUES</span>
+                                        <span className="flex items-center gap-2"><i className="fas fa-calendar text-[8px]"></i> {aiSummary.metadata.date}</span>
+                                        <span className="flex items-center gap-2"><i className="fas fa-theater-masks text-[8px]"></i> {aiSummary.metadata.tone}</span>
+                                    </div>
+                                )}
+                                <div className="space-y-3">
+                                    {aiSummary.points.map((p, i) => (
+                                        <div key={i} className="flex items-start gap-4 text-[11px] font-bold text-[var(--theme-text-dim)]">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 shrink-0"></span>
+                                            <span>{p}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 

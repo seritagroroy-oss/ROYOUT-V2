@@ -4,8 +4,17 @@ import { useApi } from '../hooks/useApi';
 
 const SearchSection = ({ onAnalyze, onSearch }) => {
     const [query, setQuery] = useState('');
+    const [activeFilter, setActiveFilter] = useState('mixed');
     const { setIsLoading, isLoading } = useAppState();
     const { callApi } = useApi();
+
+    const filters = [
+        { id: 'mixed', label: 'Tout', icon: 'fa-search' },
+        { id: 'video', label: 'Vidéos', icon: 'fa-video' },
+        { id: 'playlist', label: 'Playlists', icon: 'fa-list-ul' },
+        { id: 'short', label: '- 4m', icon: 'fa-clock' },
+        { id: 'long', label: '+ 20m', icon: 'fa-hourglass-half' },
+    ];
 
     const handleAction = () => {
         if (!query.trim()) return;
@@ -13,12 +22,12 @@ const SearchSection = ({ onAnalyze, onSearch }) => {
         if (q.includes('youtube.com/') || q.includes('youtu.be/')) {
             onAnalyze(q);
         } else {
-            onSearch(q);
+            onSearch(q, activeFilter);
         }
     };
 
     return (
-        <div className="w-full max-w-5xl mx-auto py-12">
+        <div className="w-full max-w-5xl mx-auto py-12 space-y-6">
             <div className={`
                 search-bar-container flex gap-3 p-2 bg-[var(--theme-card)] border border-[var(--theme-border)] rounded-[32px] backdrop-blur-xl 
                 transition-all duration-500 group focus-within:border-red-500/30 focus-within:bg-[var(--theme-card-hover)]
@@ -59,6 +68,24 @@ const SearchSection = ({ onAnalyze, onSearch }) => {
                         </>
                     )}
                 </button>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 animate-in fade-in slide-in-from-top-2 duration-700">
+                {filters.map(f => (
+                    <button
+                        key={f.id}
+                        onClick={() => setActiveFilter(f.id)}
+                        className={`
+                            flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all
+                            ${activeFilter === f.id 
+                                ? 'bg-red-600 text-white shadow-lg shadow-red-600/20 scale-105' 
+                                : 'bg-[var(--theme-card)] text-[var(--theme-text-dim)] border border-[var(--theme-border)] hover:bg-[var(--theme-card-hover)]'}
+                        `}
+                    >
+                        <i className={`fas ${f.icon} text-[9px]`}></i>
+                        {f.label}
+                    </button>
+                ))}
             </div>
         </div>
     );

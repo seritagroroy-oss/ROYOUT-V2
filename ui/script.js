@@ -12,6 +12,11 @@ let lastSearchId = 0;
 let userHasInteracted = false;
 let searchTimeout = null;
 
+// Hover Preview State
+let hoverTimeout = null;
+let currentHoverUrl = null;
+let activeHoverPlayer = null;
+
 // Gestion du Menu Déroulant
 window.royoutToggleMenu = function(event) {
     if (event) event.stopPropagation(); // Empêcher la propagation au document
@@ -1241,9 +1246,27 @@ function renderDiscoveryCards(results, append = false) {
         const iconClass = isPlaylist ? 'fas fa-list-ul' : 'fas fa-play';
         
         return `
-        <div onclick="analyzeDirect('${video.url}')" class="group video-card-glow cursor-pointer flex flex-col gap-3 p-3 rounded-[28px] bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-red-500/30 transition-all duration-500">
+        <div onclick="analyzeDirect('${video.url}')" 
+             onmouseenter="startHoverPreview(this, '${video.url}', '${video.uploader || 'YouTube'}')" 
+             onmouseleave="stopHoverPreview(this)"
+             class="group video-card-glow relative cursor-pointer flex flex-col gap-3 p-3 rounded-[28px] bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-red-500/30 transition-all duration-500">
+            
+            <div class="preview-tooltip">
+                <span class="tooltip-tag">Propulsé par RoYout</span>
+                <span>${video.uploader || 'YouTube'} • ${video.duration}</span>
+            </div>
+
             <div class="relative aspect-video rounded-2xl overflow-hidden shadow-lg">
                 <img src="${video.thumbnail}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.src='logo.png'">
+                
+                <!-- Preview Container -->
+                <div class="preview-video-container">
+                    <div class="preview-loader">
+                        <i class="fas fa-circle-notch fa-spin text-white/50"></i>
+                    </div>
+                    <div class="preview-progress-bar"></div>
+                </div>
+
                 <div class="absolute top-2 left-2 px-2 py-1 ${badgeClass} ${isPlaylist ? 'playlist-badge-pulse' : ''} backdrop-blur-md rounded-md text-[8px] font-black text-white border border-white/20 shadow-lg uppercase">
                     ${badgeText}
                 </div>
@@ -1295,9 +1318,97 @@ function renderDiscoveryCards(results, append = false) {
 }
 
 window.analyzeDirect = function(url) {
+    stopHoverPreview(); // Arrêter l'aperçu si on clique
     document.getElementById('url').value = url;
     analyzeVideo();
     // On ne scrolle plus, le modal va apparaître par dessus
+};
+
+// --- Hover Preview Logic ---
+
+window.startHoverPreview = function(element, url, uploader) {
+    if (url.includes('playlist')) return; // Pas d'aperçu pour les playlists pour l'instant
+    
+    currentHoverUrl = url;
+    const container = element.querySelector('.preview-video-container');
+    const loader = element.querySelector('.preview-loader');
+    const progressBar = element.querySelector('.preview-progress-bar');
+    
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    
+    hoverTimeout = setTimeout(() => {
+        if (currentHoverUrl !== url) return;
+        
+        console.log("Démarrage de l'aperçu pour:", url);
+        if (loader) loader.classList.add('active');
+        if (container) container.classList.add('active');
+        
+        window.pywebview.api.get_stream_url(url).then(response => {
+            if (response.status === 'success' && currentHoverUrl === url) {
+                if (loader) loader.classList.remove('active');
+                
+                // Création du lecteur vidéo minimaliste
+                const video = document.createElement('video');
+                video.src = response.url;
+                video.className = 'preview-video-element';
+                video.muted = true;
+                video.autoplay = true;
+                video.loop = true;
+                video.playsInline = true;
+                
+                // Gestion de la progression
+                video.ontimeupdate = () => {
+                    const percent = (video.currentTime / video.duration) * 100;
+                    if (progressBar) progressBar.style.width = percent + '%';
+                };
+                
+                // Nettoyage de l'ancien lecteur si présent
+                if (activeHoverPlayer) {
+                    activeHoverPlayer.pause();
+                    activeHoverPlayer.remove();
+                }
+                
+                container.appendChild(video);
+                activeHoverPlayer = video;
+                
+                video.play().catch(e => console.error("Erreur lecture aperçu:", e));
+            } else {
+                if (container) container.classList.remove('active');
+                if (loader) loader.classList.remove('active');
+            }
+        }).catch(err => {
+            console.error("Erreur flux aperçu:", err);
+            if (container) container.classList.remove('active');
+            if (loader) loader.classList.remove('active');
+        });
+    }, 1200); // Délai de 1.2s pour éviter les déclenchements accidentels
+};
+
+window.stopHoverPreview = function(element) {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    currentHoverUrl = null;
+    
+    if (element) {
+        const container = element.querySelector('.preview-video-container');
+        const loader = element.querySelector('.preview-loader');
+        const progressBar = element.querySelector('.preview-progress-bar');
+        
+        if (container) {
+            container.classList.remove('active');
+            // Retirer la vidéo après l'animation de fondu
+            setTimeout(() => {
+                const video = container.querySelector('video');
+                if (video) video.remove();
+                if (progressBar) progressBar.style.width = '0%';
+            }, 500);
+        }
+        if (loader) loader.classList.remove('active');
+    }
+
+    if (activeHoverPlayer) {
+        activeHoverPlayer.pause();
+        activeHoverPlayer = null;
+    }
 };
 
 window.goBack = function() {
